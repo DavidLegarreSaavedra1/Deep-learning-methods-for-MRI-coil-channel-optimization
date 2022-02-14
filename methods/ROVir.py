@@ -11,10 +11,17 @@ def ROVir(coils, regions, lowf):
     w = filter_coils(coils)
     tmp_A = w[A_H, A_W, :]
     img_A = tmp_A.flatten().reshape(tmp_A.shape[0]*tmp_A.shape[1], w.shape[2])
-    tmp_B = w[B1_H, B1_W, :] + w[B1_H, B2_W, :]
-    img_B = tmp_B.flatten().reshape(tmp_B.shape[0]*tmp_B.shape[1], w.shape[2])
-    #A = generate_matrix(w[A_H, A_W, :])
-    #B = generate_matrix(w[B_H, B_W, :])
+
+    tmp_B1 = w[B1_H, B1_W, :]
+    tmp_B2 = w[B1_H, B2_W, :]
+
+    img_B1 = tmp_B1.flatten().reshape(
+        tmp_B1.shape[0]*tmp_B1.shape[1], w.shape[2])
+    img_B2 = tmp_B2.flatten().reshape(
+        tmp_B2.shape[0]*tmp_B2.shape[1], w.shape[2])
+
+    img_B = np.append(img_B1, img_B2)
+    print(f"{img_B.shape=}")
 
     A = generate_matrix(img_A)
     B = generate_matrix(img_B)
@@ -54,3 +61,11 @@ def filter_coils(coils):
             gaussian_filter(coils[:, :, i], sigma=5))
 
     return new_coils
+
+
+def join_matrices_padding(A, B, p=0):
+    C = np.ones((A.shape[0]+B.shape[0], A.shape[1] + B.shape[1], A.shape[2]))*p
+    C[:A.shape[0], :A.shape[1], :] = A
+    C[A.shape[0]:, A.shape[1]:, :] = B
+
+    return C
