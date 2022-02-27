@@ -15,33 +15,45 @@ def calculate_eig(A, lowf):
 
 def matrix_to_vec(matrix):
     rows, cols, dim = matrix.shape
+    print(f"{rows,cols,dim=}")
     vec = matrix.flatten().reshape(
         rows*cols, dim
     )
-    return vec, [rows, cols]
+    print(f"{vec.shape=}")
+    return vec
 
 
 def vec_to_matrix(vec, rows, cols):
-
-    return vec.reshape(
+    matrix = vec.reshape(
         rows, cols, vec.shape[1]
     )
-
-
-def generate_matrix(imgs):
-    matrix = np.zeros((imgs.shape[1], imgs.shape[1]))
-    for i in range(imgs.shape[1]):
-        for j in range(imgs.shape[1]):
-            matrix[i, j] += imgs[:, i].T.dot(imgs[:, j])
 
     return matrix
 
 
+def generate_matrix(coils):
+    """Generate a matrix according to ROVir method"""
+
+    new_coils = np.zeros(coils.shape)
+    for i in range(coils.shape[-1]):
+        new_coils[:, :, i] = coils[:, :, i].T.dot(coils[:, :, i])
+
+    print(f"{new_coils.shape=}")
+    return np.sum(new_coils, axis=2)
+
+
 def filter_coils(coils):
+    """Apply an extreme gaussian filter to all coils
+
+    Going through each coil, we apply a strong gaussian filter
+    to it, so that we can find the weight of the signal at 
+    that coil
+    """
+
     new_coils = np.zeros(coils.shape)
     for i in range(coils.shape[2]):
         new_coils[:, :, i] = LA.norm(
-            gaussian_filter(coils[:, :, i], sigma=5))
+            gaussian_filter(coils[:, :, i], sigma=50))
 
     return new_coils
 
