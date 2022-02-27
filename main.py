@@ -15,6 +15,7 @@ B2_W = slice(0, 100)
 A_H = slice(240, 405)
 B1_H = slice(100, 450)
 
+DEBUGGING = True
 
 if __name__ == '__main__':
     print(data_path)
@@ -24,7 +25,8 @@ if __name__ == '__main__':
     height = img.shape[0]
     width = img.shape[1]
     num_coils = img.shape[2]
-    lowf = int(input("lowf = "))
+    #lowf = int(input("lowf = "))
+    lowf = 8
 
     print(img.shape)
 
@@ -38,11 +40,13 @@ if __name__ == '__main__':
 
     rovir_coils = ROVir(img_np, regions,  lowf)
 
-    #axs[1].imshow(rovir_coils[:, :, 0], cmap='gray')
-    new_img = combine_images(rovir_coils)
-    im2 = axs[1].imshow(new_img, cmap='gray')
-    axs[1].set_title('After ROVir')
-    # for im in plt.gca().get_images():
-    #    im.set_clim(0, 1000)
-    im1.set_clim(0, 1000)
-    plt.show()
+    if DEBUGGING:
+        new_img = combine_images(rovir_coils)
+        im2 = axs[1].imshow(new_img, cmap='gray')
+        axs[1].set_title('After ROVir')
+        for im in plt.gca().get_images():
+            im.set_clim(0, 10000)
+        im1.set_clim(0, 1000)
+        plt.show()
+    else:
+        pass

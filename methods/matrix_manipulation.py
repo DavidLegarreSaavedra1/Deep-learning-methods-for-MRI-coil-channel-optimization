@@ -1,5 +1,5 @@
 import numpy as np
-from numpy import linalg as la
+from numpy import linalg as LA
 from scipy.ndimage import gaussian_filter
 from scipy import signal
 import matplotlib.pyplot as plt
@@ -11,6 +11,21 @@ def calculate_eig(A, lowf):
     idx = eigenValues.argsort()[::-1]
     idx = idx[:-lowf]
     return idx
+
+
+def matrix_to_vec(matrix):
+    rows, cols, dim = matrix.shape
+    vec = matrix.flatten().reshape(
+        rows*cols, dim
+    )
+    return vec, [rows, cols]
+
+
+def vec_to_matrix(vec, rows, cols):
+
+    return vec.reshape(
+        rows, cols, vec.shape[1]
+    )
 
 
 def generate_matrix(imgs):
