@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     prev_img = combine_images(img_np)
     fig, axs = plt.subplots(1, 2)
-    axs[0].imshow(prev_img, cmap='gray')
+    im1 = axs[0].imshow(prev_img, cmap='gray')
     axs[0].set_title('Before ROVir')
     regions = [A_W, A_H, B1_W, B1_H, B2_W]
 
@@ -40,8 +40,9 @@ if __name__ == '__main__':
 
     #axs[1].imshow(rovir_coils[:, :, 0], cmap='gray')
     new_img = combine_images(rovir_coils)
-    axs[1].imshow(new_img, cmap='gray')
+    im2 = axs[1].imshow(new_img, cmap='gray')
     axs[1].set_title('After ROVir')
-    for im in plt.gca().get_images():
-        im.set_clim(0, 1000)
+    # for im in plt.gca().get_images():
+    #    im.set_clim(0, 1000)
+    im1.set_clim(0, 1000)
     plt.show()

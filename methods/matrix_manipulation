@@ -1,0 +1,41 @@
+import numpy as np
+from numpy import linalg as la
+from scipy.ndimage import gaussian_filter
+from scipy import signal
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+
+
+def calculate_eig(A, lowf):
+    eigenValues, _ = LA.eig(A)
+    idx = eigenValues.argsort()[::-1]
+    idx = idx[:-lowf]
+    return idx
+
+
+def generate_matrix(imgs):
+    matrix = np.zeros((imgs.shape[1], imgs.shape[1]))
+    for i in range(imgs.shape[1]):
+        for j in range(imgs.shape[1]):
+            matrix[i, j] += imgs[:, i].T.dot(imgs[:, j])
+
+    return matrix
+
+
+def filter_coils(coils):
+    new_coils = np.zeros(coils.shape)
+    for i in range(coils.shape[2]):
+        new_coils[:, :, i] = LA.norm(
+            gaussian_filter(coils[:, :, i], sigma=5))
+
+    return new_coils
+
+
+def generate_virtual_coils(coils, weights):
+    v_coils = np.zeros(coils.shape)
+    print(f"{v_coils.shape=}")
+    for coil in range(coils.shape[1]):
+        v_coils[:, coil] = weights[coil]*coils[:, coil]
+    print(f"{v_coils.shape=}")
+
+    return v_coils
