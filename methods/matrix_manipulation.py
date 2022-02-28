@@ -15,16 +15,14 @@ def calculate_eig(A, lowf):
     print(f"{eigVal.shape=}")
     print(f"{eigVec.shape=}")
     
-    return idx
+    return idx, eigVec
 
 
 def matrix_to_vec(matrix):
     rows, cols, dim = matrix.shape
-    print(f"{rows,cols,dim=}")
     vec = matrix.flatten().reshape(
         rows*cols, dim
     )
-    print(f"{vec.shape=}")
     return vec
 
 
@@ -39,14 +37,13 @@ def vec_to_matrix(vec, rows, cols):
 def generate_matrix(coils):
     """Generate a matrix according to ROVir method"""
 
-    new_coils = np.zeros(coils.shape)
-    for i in range(coils.shape[-1]):
-        new_coils[...,i] = coils[...,  i].T.dot(coils[... ,i])
+    # Check coils have been vectorized
 
-    print(f"{new_coils.shape=}")
-    
-
-    return new_coils
+    if (len(coils.shape) > 2):
+        print("The matrix has not been vectorized")
+        return None
+    else:
+        return coils.T.dot(coils)
 
 
 def filter_coils(coils):
@@ -67,5 +64,6 @@ def filter_coils(coils):
 
 def generate_virtual_coils(coils, weights):
     v_coils = np.zeros(coils.shape)
+
 
     return v_coils

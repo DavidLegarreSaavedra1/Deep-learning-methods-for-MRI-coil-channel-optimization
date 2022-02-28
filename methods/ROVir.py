@@ -2,6 +2,7 @@ import numpy as np
 import sys
 from numpy import linalg as LA, vectorize
 from methods.matrix_manipulation import *
+from methods.combine_images import *
 import matplotlib.pyplot as plt
 
 
@@ -24,31 +25,27 @@ def ROVir(coils, regions, lowf):
     B = matrix_to_vec(B)
 
     # Generate the regions according to ROVir method
-    #A = generate_matrix(A)
-    #B = generate_matrix(B)
+    A = generate_matrix(A)
+    B = generate_matrix(B)
     
-    A = A.T.dot(A)
-    B = B.T.dot(B)
 
-    print(f"{B.shape=}")
     
     # Transform A and B back to matrices to plot
     #A = vec_to_matrix(A, HEIGHT, WIDTH)
     #B = vec_to_matrix(B, HEIGHT, WIDTH)
 
-    print(f"{B.shape=}")
 
     comb = LA.inv(B).dot(A)
-    weights = calculate_eig(comb, lowf)
-
-    print(f"{weights.shape=}")
+    topNv, eigVec = calculate_eig(comb, lowf)
+    eigVec = np.real_if_close(eigVec, tol=1)
     
+    topNvCoils = w[..., topNv]
 
-    plt.imshow(A)
+    topNvCoils = matrix_to_vec(topNvCoils)
+    new_coils = eigVec.dot(topNvCoils.T)
+
+    new_coils = vec_to_matrix(new_coils.T, HEIGHT, WIDTH)
+    new_coils = combine_images(new_coils)
+    _ = plt.imshow(new_coils, cmap='gray')
     plt.show()
-    plt.imshow(B)
-    plt.show()
-
-    print(f"{weights=}")
-
     return w

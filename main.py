@@ -45,7 +45,7 @@ if __name__ == '__main__':
         im2 = axs[1].imshow(new_img, cmap='gray')
         axs[1].set_title('After ROVir')
         for im in plt.gca().get_images():
-            im.set_clim(0, 10000)
+            im.set_clim(0, 1000)
         im1.set_clim(0, 1000)
         plt.show()
     else:
