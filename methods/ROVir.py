@@ -20,18 +20,25 @@ def ROVir(coils, regions, lowf):
     B[B1_H, B2_W, :] = w[B1_H, B2_W, :]
 
     # Convert regions to vectors for ease of calculation
-    #A = matrix_to_vec(A)
-    #B = matrix_to_vec(B)
+    A = matrix_to_vec(A)
+    B = matrix_to_vec(B)
 
     # Generate the regions according to ROVir method
-    A = generate_matrix(A)
-    B = generate_matrix(B)
+    #A = generate_matrix(A)
+    #B = generate_matrix(B)
+    
+    A = A.T.dot(A)
+    B = B.T.dot(B)
 
+    print(f"{B.shape=}")
+    
     # Transform A and B back to matrices to plot
     #A = vec_to_matrix(A, HEIGHT, WIDTH)
     #B = vec_to_matrix(B, HEIGHT, WIDTH)
 
-    comb = LA.pinv(B).dot(A)
+    print(f"{B.shape=}")
+
+    comb = LA.inv(B).dot(A)
     weights = calculate_eig(comb, lowf)
 
     print(f"{weights.shape=}")

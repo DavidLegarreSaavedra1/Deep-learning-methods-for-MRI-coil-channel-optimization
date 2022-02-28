@@ -7,9 +7,14 @@ import matplotlib.image as mpimg
 
 
 def calculate_eig(A, lowf):
-    eigenValues, _ = LA.eig(A)
+    eigenValues, eigenVectors = LA.eig(A)
     idx = eigenValues.argsort()[::-1]
     idx = idx[:-lowf]
+    eigVal = eigenValues[idx]
+    eigVec = eigenVectors[:,idx]
+    print(f"{eigVal.shape=}")
+    print(f"{eigVec.shape=}")
+    
     return idx
 
 
@@ -39,7 +44,9 @@ def generate_matrix(coils):
         new_coils[...,i] = coils[...,  i].T.dot(coils[... ,i])
 
     print(f"{new_coils.shape=}")
-    return np.sum(new_coils, axis=2)
+    
+
+    return new_coils
 
 
 def filter_coils(coils):
