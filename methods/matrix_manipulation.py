@@ -36,7 +36,7 @@ def generate_matrix(coils):
 
     new_coils = np.zeros(coils.shape)
     for i in range(coils.shape[-1]):
-        new_coils[:, :, i] = coils[:, :, i].T.dot(coils[:, :, i])
+        new_coils[...,i] = coils[...,  i].T.dot(coils[... ,i])
 
     print(f"{new_coils.shape=}")
     return np.sum(new_coils, axis=2)
@@ -60,9 +60,5 @@ def filter_coils(coils):
 
 def generate_virtual_coils(coils, weights):
     v_coils = np.zeros(coils.shape)
-    print(f"{v_coils.shape=}")
-    for coil in range(coils.shape[1]):
-        v_coils[:, coil] = weights[coil]*coils[:, coil]
-    print(f"{v_coils.shape=}")
 
     return v_coils

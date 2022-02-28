@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
     rovir_coils = ROVir(img_np, regions,  lowf)
 
-    if DEBUGGING:
+    if not DEBUGGING:
         new_img = combine_images(rovir_coils)
         im2 = axs[1].imshow(new_img, cmap='gray')
         axs[1].set_title('After ROVir')

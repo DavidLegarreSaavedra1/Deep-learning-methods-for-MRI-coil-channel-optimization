@@ -31,11 +31,10 @@ def ROVir(coils, regions, lowf):
     #A = vec_to_matrix(A, HEIGHT, WIDTH)
     #B = vec_to_matrix(B, HEIGHT, WIDTH)
 
-    comb = LA.pinv(B).dot(A)
+    comb = LA.inv(B).dot(A)
     weights = calculate_eig(comb, lowf)
 
-    print(f"{weights.shape=}")
-    
+     
 
     plt.imshow(A)
     plt.show()
