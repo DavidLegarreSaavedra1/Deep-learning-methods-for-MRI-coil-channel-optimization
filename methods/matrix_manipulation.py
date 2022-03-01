@@ -10,6 +10,8 @@ def calculate_eig(A, lowf):
     eigVal, eigVec = LA.eig(A)
     topNv = eigVal.argsort()[::-1]
     topNv = topNv[:-lowf]
+    eigVal = eigVal[topNv]
+    eigVec = eigVec[:, topNv]
     return topNv, eigVal, eigVec
 
 
@@ -63,14 +65,14 @@ def generate_virtual_coils(coils, weights, topNv):
 
     for j in range(topNv):
         total = 0
-        for i in range(ncoils):
-            total += weights[i, j]*coils[:, :, i]
+        for l in range(ncoils):
+            total += weights[l, j]*coils[:, :, l]
         v_coils[:, :, j] = total
 
     return v_coils
 
 
-def plot_coils(coils, title):
+def plot_coils(coils, title=''):
     ncoils = coils.shape[-1]
     x = int(np.floor(np.sqrt(ncoils)))
     fig, axs = plt.subplots(x, x)
@@ -79,14 +81,11 @@ def plot_coils(coils, title):
         ax.imshow(coils[..., i], cmap='gray')
         i += 1
     fig.suptitle(title, fontsize=16)
-    plt.show()
     return
 
 
 def normalize_matrix(matrix):
-    max_pixel = matrix.max()
-
-    return matrix * 1/max_pixel
+    return matrix/LA.norm(matrix)
 
 
 def expand_weights(weights, size):

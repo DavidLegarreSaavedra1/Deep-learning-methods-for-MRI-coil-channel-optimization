@@ -2,12 +2,10 @@ import numpy as np
 from numpy import linalg as LA
 from scipy import signal
 
-a = np.floor(
-    np.random.rand(5, 5)
-)
+x = np.random.rand(3, 3)
+I = np.identity(3)
 
-eigVal, eigVec = LA.eig(a)
+print(f'{x=}')
+print(f'{I=}')
 
-print(f'{a.shape=}')
-
-print(f'{eigVec.shape=}')
+print(f'{I.dot(x)=}')

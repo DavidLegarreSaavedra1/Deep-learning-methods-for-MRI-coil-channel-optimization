@@ -9,9 +9,11 @@ import matplotlib.pyplot as plt
 def ROVir(coils, regions, lowf):
     A_W, A_H, B1_W, B1_H, B2_W = regions
 
+    print("Filtering the image...")
     w_coils = coils*filter_coils(coils)
 
     HEIGHT, WIDTH, NCOILS = w_coils.shape
+    #plot_coils(w_coils, 'W_coils')
 
     A = np.zeros(w_coils.shape)
     B = np.zeros(w_coils.shape)
@@ -25,17 +27,16 @@ def ROVir(coils, regions, lowf):
     B = matrix_to_vec(B)
 
     # Generate the regions according to ROVir method
+    print("Generating matrices...")
     A = generate_matrix(A)
     B = generate_matrix(B)
 
-    comb = LA.inv(B).dot(A)
+    comb = LA.inv(B)*A
     topNv, eigVal, weights = calculate_eig(comb, lowf)
 
-    #weights = expand_weights(eigVec, (NCOILS, NCOILS))
-
-    print(f'{w_coils.shape=}')
-    print(f'{weights=}')
+    weights = expand_weights(weights, (NCOILS, NCOILS))
 
     v_coils = generate_virtual_coils(coils, weights, len(topNv))
 
     return v_coils
+    # return w_coils
