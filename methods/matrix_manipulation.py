@@ -37,13 +37,14 @@ def vec_to_matrix(vec, rows, cols):
 def generate_matrix(coils):
     """Generate a matrix according to ROVir method"""
 
-    # Check coils have been vectorized
+    ncoils = coils.shape[-1]
+    matrix = np.zeros((ncoils, ncoils))
+    for i in range(ncoils):
+        for j in range(ncoils):
+            matrix[i,j] = np.sum(coils[:,i].T.dot(coils[:,j]))
 
-    if (len(coils.shape) > 2):
-        print("The matrix has not been vectorized")
-        return None
-    else:
-        return coils.T.dot(coils)
+    return matrix 
+
 
 
 def filter_coils(coils):
@@ -56,14 +57,36 @@ def filter_coils(coils):
 
     new_coils = np.zeros(coils.shape)
     for i in range(coils.shape[2]):
-        new_coils[:, :, i] = LA.norm(
-            gaussian_filter(coils[:, :, i], sigma=50))
+        new_coils[:, :, i] = normalize_matrix(gaussian_filter(coils[:, :, i],
+                                              sigma=50))
 
     return new_coils
 
 
 def generate_virtual_coils(coils, weights):
     v_coils = np.zeros(coils.shape)
-
+    ncoils = coils.shape[-1]
+    
+    for i in range(ncoils):
+        for j in range(ncoils):
+            j_weight = np.multiply(np.ones(v_coils.shape[:2]),weights[:,j])
+            v_coils[:,:,i] += j_weight*coils[:,:,j]
 
     return v_coils
+
+
+def plot_coils(coils):
+    ncoils = coils.shape[-1]
+    x = int(np.floor(np.sqrt(ncoils)))
+    fig, axs = plt.subplots(x,x)
+    i = 0
+    for ax in axs.reshape(ncoils):
+        ax.imshow(coils[...,i], cmap='gray')
+        i += 1
+    plt.show()
+    return
+
+def normalize_matrix(matrix):
+    max_pixel = matrix.max()
+
+    return matrix * 1/max_pixel

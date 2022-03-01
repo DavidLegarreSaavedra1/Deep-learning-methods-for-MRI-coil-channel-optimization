@@ -28,24 +28,23 @@ def ROVir(coils, regions, lowf):
     A = generate_matrix(A)
     B = generate_matrix(B)
     
-
+    print(f"{A.shape=}")
     
     # Transform A and B back to matrices to plot
     #A = vec_to_matrix(A, HEIGHT, WIDTH)
     #B = vec_to_matrix(B, HEIGHT, WIDTH)
 
-
     comb = LA.inv(B).dot(A)
     topNv, eigVec = calculate_eig(comb, lowf)
-    eigVec = np.real_if_close(eigVec, tol=1)
+    weights = np.real_if_close(eigVec, tol=1)
     
-    topNvCoils = w[..., topNv]
-
-    topNvCoils = matrix_to_vec(topNvCoils)
-    new_coils = eigVec.dot(topNvCoils.T)
-
-    new_coils = vec_to_matrix(new_coils.T, HEIGHT, WIDTH)
-    new_coils = combine_images(new_coils)
-    _ = plt.imshow(new_coils, cmap='gray')
+    print(f"{w.shape=}")
+    print(f"{weights.shape=}")
+    
+    #v_coils = generate_virtual_coils(w, weights)
+    
+    plot_coils(w)
+    
+    _ = plt.imshow(comb, cmap='gray')
     plt.show()
     return w
