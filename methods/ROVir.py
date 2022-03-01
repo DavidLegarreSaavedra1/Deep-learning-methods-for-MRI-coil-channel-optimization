@@ -9,16 +9,16 @@ import matplotlib.pyplot as plt
 def ROVir(coils, regions, lowf):
     A_W, A_H, B1_W, B1_H, B2_W = regions
 
-    w = filter_coils(coils)
+    w_coils = coils*filter_coils(coils)
 
-    HEIGHT, WIDTH, NCOILS = w.shape
+    HEIGHT, WIDTH, NCOILS = w_coils.shape
 
-    A = np.zeros(w.shape)
-    B = np.zeros(w.shape)
+    A = np.zeros(w_coils.shape)
+    B = np.zeros(w_coils.shape)
 
-    A[A_H, A_W, :] = w[A_H, A_W, :]
-    B[B1_H, B1_W, :] = w[B1_H, B1_W, :]
-    B[B1_H, B2_W, :] = w[B1_H, B2_W, :]
+    A[A_H, A_W, :] = w_coils[A_H, A_W, :]
+    B[B1_H, B1_W, :] = w_coils[B1_H, B1_W, :]
+    B[B1_H, B2_W, :] = w_coils[B1_H, B2_W, :]
 
     # Convert regions to vectors for ease of calculation
     A = matrix_to_vec(A)
@@ -27,24 +27,15 @@ def ROVir(coils, regions, lowf):
     # Generate the regions according to ROVir method
     A = generate_matrix(A)
     B = generate_matrix(B)
-    
-    print(f"{A.shape=}")
-    
-    # Transform A and B back to matrices to plot
-    #A = vec_to_matrix(A, HEIGHT, WIDTH)
-    #B = vec_to_matrix(B, HEIGHT, WIDTH)
 
     comb = LA.inv(B).dot(A)
-    topNv, eigVec = calculate_eig(comb, lowf)
-    weights = np.real_if_close(eigVec, tol=1)
-    
-    print(f"{w.shape=}")
-    print(f"{weights.shape=}")
-    
-    #v_coils = generate_virtual_coils(w, weights)
-    
-    plot_coils(w)
-    
-    _ = plt.imshow(comb, cmap='gray')
-    plt.show()
-    return w
+    topNv, eigVal, weights = calculate_eig(comb, lowf)
+
+    #weights = expand_weights(eigVec, (NCOILS, NCOILS))
+
+    print(f'{w_coils.shape=}')
+    print(f'{weights=}')
+
+    v_coils = generate_virtual_coils(coils, weights, len(topNv))
+
+    return v_coils

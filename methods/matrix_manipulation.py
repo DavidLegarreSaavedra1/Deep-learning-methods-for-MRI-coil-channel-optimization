@@ -7,15 +7,10 @@ import matplotlib.image as mpimg
 
 
 def calculate_eig(A, lowf):
-    eigenValues, eigenVectors = LA.eig(A)
-    idx = eigenValues.argsort()[::-1]
-    idx = idx[:-lowf]
-    eigVal = eigenValues[idx]
-    eigVec = eigenVectors[:,idx]
-    print(f"{eigVal.shape=}")
-    print(f"{eigVec.shape=}")
-    
-    return idx, eigVec
+    eigVal, eigVec = LA.eig(A)
+    topNv = eigVal.argsort()[::-1]
+    topNv = topNv[:-lowf]
+    return topNv, eigVal, eigVec
 
 
 def matrix_to_vec(matrix):
@@ -41,10 +36,9 @@ def generate_matrix(coils):
     matrix = np.zeros((ncoils, ncoils))
     for i in range(ncoils):
         for j in range(ncoils):
-            matrix[i,j] = np.sum(coils[:,i].T.dot(coils[:,j]))
+            matrix[i, j] = np.sum(coils[:, i].T.dot(coils[:, j]))
 
-    return matrix 
-
+    return matrix
 
 
 def filter_coils(coils):
@@ -63,30 +57,39 @@ def filter_coils(coils):
     return new_coils
 
 
-def generate_virtual_coils(coils, weights):
+def generate_virtual_coils(coils, weights, topNv):
     v_coils = np.zeros(coils.shape)
     ncoils = coils.shape[-1]
-    
-    for i in range(ncoils):
-        for j in range(ncoils):
-            j_weight = np.multiply(np.ones(v_coils.shape[:2]),weights[:,j])
-            v_coils[:,:,i] += j_weight*coils[:,:,j]
+
+    for j in range(topNv):
+        total = 0
+        for i in range(ncoils):
+            total += weights[i, j]*coils[:, :, i]
+        v_coils[:, :, j] = total
 
     return v_coils
 
 
-def plot_coils(coils):
+def plot_coils(coils, title):
     ncoils = coils.shape[-1]
     x = int(np.floor(np.sqrt(ncoils)))
-    fig, axs = plt.subplots(x,x)
+    fig, axs = plt.subplots(x, x)
     i = 0
     for ax in axs.reshape(ncoils):
-        ax.imshow(coils[...,i], cmap='gray')
+        ax.imshow(coils[..., i], cmap='gray')
         i += 1
+    fig.suptitle(title, fontsize=16)
     plt.show()
     return
+
 
 def normalize_matrix(matrix):
     max_pixel = matrix.max()
 
     return matrix * 1/max_pixel
+
+
+def expand_weights(weights, size):
+    weights_ = np.zeros(size)
+    weights_[:weights.shape[0], :weights.shape[1]] = weights
+    return weights_
