@@ -22,6 +22,9 @@ def ROVir(coils, regions, lowf):
     B[B1_H, B1_W, :] = w_coils[B1_H, B1_W, :]
     B[B1_H, B2_W, :] = w_coils[B1_H, B2_W, :]
 
+    # plot_coils(A)
+    # plot_coils(B)
+
     # Convert regions to vectors for ease of calculation
     A = matrix_to_vec(A)
     B = matrix_to_vec(B)

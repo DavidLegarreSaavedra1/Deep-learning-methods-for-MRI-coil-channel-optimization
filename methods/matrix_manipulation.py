@@ -78,7 +78,7 @@ def plot_coils(coils, title=''):
     fig, axs = plt.subplots(x, x)
     i = 0
     for ax in axs.reshape(ncoils):
-        ax.imshow(coils[..., i], cmap='gray')
+        ax.imshow(coils[..., i], cmap='gray',  extent=[0, 1, 0, 1])
         i += 1
     fig.suptitle(title, fontsize=16)
     return
@@ -91,4 +91,4 @@ def normalize_matrix(matrix):
 def expand_weights(weights, size):
     weights_ = np.zeros(size)
     weights_[:weights.shape[0], :weights.shape[1]] = weights
-    return weights_
+    return np.absolute(weights_)

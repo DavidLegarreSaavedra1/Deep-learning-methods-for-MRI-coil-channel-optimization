@@ -10,12 +10,12 @@ dirs = [os.getcwd(), "data", "Slice44-AllChannels.nii"]
 data_path = os.path.join(*dirs)
 
 A_W = slice(110, 410)
-B1_W = slice(311, -1)
+B1_W = slice(411, -1)
 B2_W = slice(0, 100)
-A_H = slice(240, 405)
-B1_H = slice(100, 450)
+A_H = slice(100, 405)
+B1_H = slice(100, 350)
 
-DEBUGGING = False
+DEBUGGING = True
 
 if __name__ == '__main__':
     img = nib.load(data_path)
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     if not DEBUGGING:
         new_img = combine_images(rovir_coils)
 
-        #plot_coils(rovir_coils, 'Virtual coils')
+        plot_coils(rovir_coils, 'Virtual coils')
 
         im1 = axs[0].imshow(prev_img, cmap='gray')
         axs[0].set_title('Before ROVir')
@@ -51,7 +51,19 @@ if __name__ == '__main__':
         print(f'{np.mean(new_img)=}')
 
         im1.set_clim(0, 1000)
-        im2.set_clim(0, 500)
+        im2.set_clim(0, 1000)
     else:
+        top5 = combine_images(rovir_coils[:, :, :5])
+        bot5 = combine_images(rovir_coils[:, :, -13:])
+
+        im2 = axs[0].imshow(top5, cmap='gray')
+        axs[0].set_title('Top 5 coils')
+
+        im3 = axs[1].imshow(bot5, cmap='gray')
+        axs[1].set_title('Bottom 5 coils')
+
+        plot_coils(rovir_coils)
+
         pass
+
     plt.show()
