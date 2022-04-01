@@ -10,8 +10,8 @@ def ROVir(coils, regions, lowf):
     A_W, A_H, B1_W, B1_H, B2_W = regions
 
     print("Filtering the image...")
-    w_coils = coils*filter_coils(coils)
-
+    #w_coils = coils*filter_coils(coils)
+    w_coils = filter_coils(coils)
     HEIGHT, WIDTH, NCOILS = w_coils.shape
     #plot_coils(w_coils, 'W_coils')
 
@@ -22,8 +22,8 @@ def ROVir(coils, regions, lowf):
     B[B1_H, B1_W, :] = w_coils[B1_H, B1_W, :]
     B[B1_H, B2_W, :] = w_coils[B1_H, B2_W, :]
 
-    # plot_coils(A)
-    # plot_coils(B)
+    plot_coils(A)
+    plot_coils(B)
 
     # Convert regions to vectors for ease of calculation
     A = matrix_to_vec(A)

@@ -10,12 +10,12 @@ dirs = [os.getcwd(), "data", "Slice44-AllChannels.nii"]
 data_path = os.path.join(*dirs)
 
 A_W = slice(110, 410)
-B1_W = slice(411, -1)
-B2_W = slice(0, 100)
+B1_W = slice(421, -1)
+B2_W = slice(0, 50)
 A_H = slice(100, 405)
 B1_H = slice(100, 350)
 
-DEBUGGING = True
+DEBUGGING = False
 
 if __name__ == '__main__':
     img = nib.load(data_path)
@@ -51,7 +51,7 @@ if __name__ == '__main__':
         print(f'{np.mean(new_img)=}')
 
         im1.set_clim(0, 1000)
-        im2.set_clim(0, 1000)
+        im2.set_clim(0, 1500)
     else:
         top5 = combine_images(rovir_coils[:, :, :5])
         bot5 = combine_images(rovir_coils[:, :, -13:])

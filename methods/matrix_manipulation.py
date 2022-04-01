@@ -54,7 +54,7 @@ def filter_coils(coils):
     new_coils = np.zeros(coils.shape)
     for i in range(coils.shape[2]):
         new_coils[:, :, i] = normalize_matrix(gaussian_filter(coils[:, :, i],
-                                              sigma=50))
+                                              sigma=1))
 
     return new_coils
 
