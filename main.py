@@ -4,8 +4,6 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 from methods import *
 
-import time
-
 dirs = [os.getcwd(), "data", "Slice44-AllChannels.nii"]
 data_path = os.path.join(*dirs)
 
