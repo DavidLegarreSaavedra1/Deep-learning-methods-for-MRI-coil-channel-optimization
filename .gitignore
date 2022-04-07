@@ -130,6 +130,9 @@ dmypy.json
 
 
 data/
+ROVir/data/
+NNs/data/
 ideas/
 results/
 *.pdf
+*.h5
