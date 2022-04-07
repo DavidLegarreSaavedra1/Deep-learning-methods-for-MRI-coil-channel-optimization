@@ -43,6 +43,19 @@ def generate_matrix(coils):
     return matrix
 
 
+def generate_matrix_im(coils):
+    """Generate a matrix according to ROVir method"""
+
+    ncoils = coils.shape[-1]
+    matrix = np.zeros((ncoils, ncoils))
+    coils = np.matrix(coils)
+    for i in range(ncoils):
+        for j in range(ncoils):
+            matrix[i, j] = np.sum(coils[:, i].H.dot(coils[:, j]))
+
+    return matrix
+
+
 def filter_coils(coils):
     """Apply an extreme gaussian filter to all coils
 
@@ -52,9 +65,9 @@ def filter_coils(coils):
     """
 
     new_coils = np.zeros(coils.shape)
-    for i in range(coils.shape[2]):
-        new_coils[:, :, i] = normalize_matrix(gaussian_filter(coils[:, :, i],
-                                              sigma=1))
+    for i in range(coils.shape[-1]):
+        new_coils[..., i] = normalize_matrix(gaussian_filter(coils[..., i],
+                                                             sigma=1))
 
     return new_coils
 
@@ -92,3 +105,16 @@ def expand_weights(weights, size):
     weights_ = np.zeros(size)
     weights_[:weights.shape[0], :weights.shape[1]] = weights
     return np.absolute(weights_)
+
+
+def get_real(img_mat):
+
+    real_mat = np.zeros(img_mat.shape)
+
+    dims = img_mat.shape
+
+    for i in range(dims[0]):
+        for j in range(dims[1]):
+            real_mat[i, j] = img_mat[0, 0][0]
+
+    return real_mat
