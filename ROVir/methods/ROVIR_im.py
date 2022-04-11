@@ -38,12 +38,10 @@ def ROVir_im(coils, regions, lowf=5):
     A = generate_matrix_im(A)
     B = generate_matrix_im(B)
 
-    comb = LA.inv(B)*A
+    comb = LA.pinv(B)*A
     topNv, eigVal, weights = calculate_eig(comb, lowf)
 
     weights = expand_weights(weights, (ncoils, ncoils))
 
-    v_coils = generate_virtual_coils(coils, weights, len(topNv))
-
-    return v_coils
+    return weights, topNv
     # return coils

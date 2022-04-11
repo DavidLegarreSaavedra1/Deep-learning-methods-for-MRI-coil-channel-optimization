@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def combine_images(channels):
@@ -10,3 +11,12 @@ def combine_images(channels):
                                       + np.square(reconstructed_image))
 
     return reconstructed_image
+
+
+def intensity_plot(image, line):
+    fig, axs = plt.subplots(1, 2)
+
+    axs[0].imshow(image)
+    axs[0].set_title('Image')
+
+    axs[1].set_title('Intensity graph')

@@ -47,10 +47,11 @@ def generate_matrix_im(coils):
     """Generate a matrix according to ROVir method"""
 
     ncoils = coils.shape[0]
-    matrix = np.zeros((ncoils, ncoils))
+    matrix = np.zeros((ncoils, ncoils)).astype(np.csingle)
     for i in range(ncoils):
         for j in range(ncoils):
-            matrix[i, j] = np.sum(np.matrix(coils[i,:,:]).H.dot(coils[i,:,:]))
+            matrix[i, j] = np.sum(
+                np.matrix(coils[i, :, :]).H.dot(coils[i, :, :]))
 
     return matrix
 
@@ -75,9 +76,9 @@ def generate_virtual_coils(coils, weights, topNv):
     v_coils = np.zeros(coils.shape)
     ncoils = coils.shape[-1]
 
-    for j in range(topNv):
+    for j in topNv:
         total = 0
-        for l in range(ncoils):
+        for l in range(ncoils-3):
             total += weights[l, j]*coils[:, :, l]
         v_coils[:, :, j] = total
 
@@ -90,7 +91,10 @@ def plot_coils(coils, title=''):
     fig, axs = plt.subplots(x, x)
     i = 0
     for ax in axs.reshape(ncoils):
-        ax.imshow(coils[..., i], cmap='gray',  extent=[0, 1, 0, 1])
+        im = ax.imshow(coils[..., i], cmap='gray',  extent=[
+            0, 0.5, 0, 0.5], vmin=0, vmax=100)
+        ax.set_title("coil: "+str(i))
+        fig.colorbar(im)
         i += 1
     fig.suptitle(title, fontsize=16)
     return
@@ -102,6 +106,5 @@ def normalize_matrix(matrix):
 
 def expand_weights(weights, size):
     weights_ = np.zeros(size)
-    weights_[:weights.shape[0], :weights.shape[1]] = weights
+    weights_[:weights.shape[0], :weights.shape[1]] = weights.real
     return np.absolute(weights_)
-

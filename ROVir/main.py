@@ -7,7 +7,7 @@ from methods import *
 from methods import ROVIR_im
 import math
 
-dirs = [os.getcwd(), "data", "CalVolumeChannelCompression.h5"]
+dirs = [os.getcwd(), "data"]
 data_path = os.path.join(*dirs)
 
 A_W = slice(22, 41)
@@ -16,16 +16,29 @@ B2_W = slice(0, 20)
 A_H = slice(30, 45)
 B1_H = slice(20, 57)
 
+regions = [A_W, A_H, B1_W, B1_H, B2_W]
+
 DEBUGGING = False
 
 if __name__ == '__main__':
-    img_data = extract_hf5_data(data_path)
+    sens = extract_hf5_data(os.path.join(
+        data_path, "CalVolumeChannelCompression.h5"))
 
-    regions = [A_W, A_H, B1_W, B1_H, B2_W]
+    img_data = nib.load(os.path.join(data_path, "Slice44-AllChannels.nii"))
 
-    new_img = ROVir_im(img_data, regions)
-    #fig, axs = plt.subplots(1, 2)
+    img_np = np.array(img_data.dataobj)
+    prev_img = combine_images(img_np)
 
-    #axs[0].imshow(img_data[:, :, 0], cmap='gray')
-    #axs[1].imshow(img_data[:, :, 0],  cmap='gray')
-    # plt.show()
+    weights, topNv = ROVir_im(sens, regions, 8)
+    print(f'{topNv=}')
+
+    plot_coils(img_np)
+
+    Vcoils = generate_virtual_coils(img_np, weights, topNv)
+    fig, axs = plt.subplots(1, 2)
+
+    new_img = combine_images(Vcoils)
+
+    axs[0].imshow(prev_img, cmap='bone')
+    axs[1].imshow(new_img,  cmap='gray')
+    plt.show()

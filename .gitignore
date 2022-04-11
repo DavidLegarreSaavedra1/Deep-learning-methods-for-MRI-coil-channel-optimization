@@ -131,6 +131,7 @@ dmypy.json
 
 data/
 ROVir/data/
+NNs/
 NNs/data/
 ideas/
 results/

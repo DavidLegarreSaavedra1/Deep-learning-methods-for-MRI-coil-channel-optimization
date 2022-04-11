@@ -1,0 +1,65 @@
+%Display
+figure
+imagesc(I)
+axis off
+colormap(gray(256))
+
+%Enhance contrast
+[y,x] = hist(I(:),128);
+tmpSum = 0;
+for k=1:length(x)
+    tmpSum = tmpSum + y(k);
+    if( tmpSum > 0.95*sum(y) ), break, end
+end
+caxis([0,x(k)])
+
+%Get mask
+%hFH = drawfreehand();
+%heartMask = hFH.createMask();
+disp('Draw heart ROI')
+heartMask = roipoly();
+close(gcf);
+
+%Save mask
+imwrite(heartMask, MaskFileOut);
+
+
+
+
+
+
+
+
+
+
+
+info = h5info(SnapFolder);
+    for curDataIdx = 1:length(info.Datasets)
+        curName = info.Datasets(curDataIdx).Name;
+        %disp(curName)
+        
+        if(length(info.Datasets(curDataIdx).Dataspace.Size)<2)
+            continue
+        end
+        
+        img = h5read(SnapFolder, ['/' curName]);
+        if(strcmp(info.Datasets(curDataIdx).Datatype.Class, 'H5T_COMPOUND'))
+            img = complex(img.real, img.imag);
+        end
+        
+        if(ndims(img) ~= 4), continue, end
+            
+        for curCoil = 1:size(img,4)
+            
+            img2 = img(:, :, :, curCoil);
+
+
+
+
+
+
+
+
+
+fig.colorbar
+
