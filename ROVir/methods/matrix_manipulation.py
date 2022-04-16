@@ -4,6 +4,7 @@ from scipy.ndimage import gaussian_filter
 from scipy import signal
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+from sklearn.preprocessing import normalize
 
 
 def calculate_eig(A, lowf):
@@ -36,6 +37,7 @@ def generate_matrix(coils):
 
     ncoils = coils.shape[-1]
     matrix = np.zeros((ncoils, ncoils))
+
     for i in range(ncoils):
         for j in range(ncoils):
             matrix[i, j] = np.sum(coils[:, i].T.dot(coils[:, j]))
@@ -67,7 +69,7 @@ def filter_coils(coils):
     new_coils = np.zeros(coils.shape)
     for i in range(coils.shape[-1]):
         new_coils[..., i] = normalize_matrix(gaussian_filter(coils[..., i],
-                                                             sigma=1))
+                                                             sigma=20))
 
     return new_coils
 
@@ -76,35 +78,47 @@ def generate_virtual_coils(coils, weights, topNv):
     v_coils = np.zeros(coils.shape)
     ncoils = coils.shape[-1]
 
-    for j in topNv:
+    for j in range(topNv):
         total = 0
-        for l in range(ncoils-3):
-            total += weights[l, j]*coils[:, :, l]
+        for l in range(ncoils):
+            try:
+                total += weights[l, j]*coils[:, :, l]
+            except:
+                pass
         v_coils[:, :, j] = total
 
     return v_coils
 
 
-def plot_coils(coils, title=''):
-    ncoils = coils.shape[-1]
-    x = int(np.floor(np.sqrt(ncoils)))
-    fig, axs = plt.subplots(x, x)
-    i = 0
-    for ax in axs.reshape(ncoils):
-        im = ax.imshow(coils[..., i], cmap='gray',  extent=[
-            0, 0.5, 0, 0.5], vmin=0, vmax=100)
-        ax.set_title("coil: "+str(i))
-        fig.colorbar(im)
-        i += 1
-    fig.suptitle(title, fontsize=16)
-    return
-
-
 def normalize_matrix(matrix):
-    return matrix/LA.norm(matrix)
+    return matrix/np.max(matrix)
 
 
 def expand_weights(weights, size):
-    weights_ = np.zeros(size)
-    weights_[:weights.shape[0], :weights.shape[1]] = weights.real
+    weights_ = np.ones(size)
+    weights_[:weights.shape[0], :weights.shape[1]] = weights
     return np.absolute(weights_)
+
+
+def gram_schmidt(A):
+
+    (n, m) = A.shape
+
+    for i in range(m):
+
+        q = A[:, i]  # i-th column of A
+
+        for j in range(i):
+            q = q - np.dot(A[:, j], A[:, i]) * A[:, j]
+
+        if np.array_equal(q, np.zeros(q.shape)):
+            raise np.linalg.LinAlgError(
+                "The column vectors are not linearly independent")
+
+        # normalize q
+        q = q / np.sqrt(np.dot(q, q))
+
+        # write the vector back in the matrix
+        A[:, i] = q
+
+    return A

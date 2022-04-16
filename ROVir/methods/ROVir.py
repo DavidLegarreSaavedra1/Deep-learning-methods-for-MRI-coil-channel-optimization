@@ -2,7 +2,7 @@ import numpy as np
 import sys
 from numpy import linalg as LA, vectorize
 from methods.matrix_manipulation import *
-from methods.combine_images import *
+from methods.image_manipulation import *
 import matplotlib.pyplot as plt
 
 
@@ -12,6 +12,9 @@ def ROVir(coils, regions, lowf):
     print("Filtering the image...")
     #w_coils = coils*filter_coils(coils)
     w_coils = filter_coils(coils)
+    print(f'{w_coils[:,:,0]=}')
+
+    plot_coils(w_coils)
     HEIGHT, WIDTH, NCOILS = w_coils.shape
     #plot_coils(w_coils, 'W_coils')
 
@@ -22,8 +25,10 @@ def ROVir(coils, regions, lowf):
     B[B1_H, B1_W, :] = w_coils[B1_H, B1_W, :]
     B[B1_H, B2_W, :] = w_coils[B1_H, B2_W, :]
 
-    plot_coils(A)
-    plot_coils(B)
+    plot_masks(combine_images(coils),
+               combine_images(A),
+               combine_images(B)
+               )
 
     # Convert regions to vectors for ease of calculation
     A = matrix_to_vec(A)
@@ -35,9 +40,10 @@ def ROVir(coils, regions, lowf):
     B = generate_matrix(B)
 
     comb = LA.inv(B)*A
+
     topNv, eigVal, weights = calculate_eig(comb, lowf)
 
-    weights = expand_weights(weights, (NCOILS, NCOILS))
+    #weights = gram_schmidt(weights)
 
     v_coils = generate_virtual_coils(coils, weights, len(topNv))
 
