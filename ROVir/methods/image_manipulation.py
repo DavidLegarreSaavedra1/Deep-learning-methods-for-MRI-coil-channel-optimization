@@ -17,7 +17,7 @@ def combine_images(channels):
 def intensity_plot(image, height, Title):
     fig, axs = plt.subplots(1, 2)
 
-    im = axs[0].imshow(image, cmap='bone')
+    im = axs[0].imshow(image, cmap='gray')
     axs[0].plot(
         [0, image.shape[0]-1],
         [height, height],

@@ -43,8 +43,6 @@ def ROVir(coils, regions, lowf):
 
     topNv, eigVal, weights = calculate_eig(comb, lowf)
 
-    #weights = gram_schmidt(weights)
-
     v_coils = generate_virtual_coils(coils, weights, len(topNv))
 
     return v_coils

@@ -50,13 +50,6 @@ if __name__ == '__main__':
                 "After ROVir"
                 )
 
-    plot_mask_A(prev_img,
-                [
-                    [240, 400],
-                    [120, 320]
-                ]
-                )
-
     intensity_plot(prev_img, 270, 'Before ROVir')
     intensity_plot(new_img, 270, 'After ROVir')
     plt.show()

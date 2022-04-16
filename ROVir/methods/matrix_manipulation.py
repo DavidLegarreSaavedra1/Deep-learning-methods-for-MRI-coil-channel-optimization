@@ -69,7 +69,7 @@ def filter_coils(coils):
     new_coils = np.zeros(coils.shape)
     for i in range(coils.shape[-1]):
         new_coils[..., i] = normalize_matrix(gaussian_filter(coils[..., i],
-                                                             sigma=20))
+                                                             sigma=15))
 
     return new_coils
 
@@ -98,27 +98,3 @@ def expand_weights(weights, size):
     weights_ = np.ones(size)
     weights_[:weights.shape[0], :weights.shape[1]] = weights
     return np.absolute(weights_)
-
-
-def gram_schmidt(A):
-
-    (n, m) = A.shape
-
-    for i in range(m):
-
-        q = A[:, i]  # i-th column of A
-
-        for j in range(i):
-            q = q - np.dot(A[:, j], A[:, i]) * A[:, j]
-
-        if np.array_equal(q, np.zeros(q.shape)):
-            raise np.linalg.LinAlgError(
-                "The column vectors are not linearly independent")
-
-        # normalize q
-        q = q / np.sqrt(np.dot(q, q))
-
-        # write the vector back in the matrix
-        A[:, i] = q
-
-    return A
