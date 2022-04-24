@@ -10,10 +10,11 @@ from sklearn.preprocessing import normalize
 def calculate_eig(A, lowf):
     eigVal, eigVec = LA.eig(A)
     topNv = eigVal.argsort()[::-1]
+    botNv = topNv[-lowf:]
     topNv = topNv[:-lowf]
-    eigVal = eigVal[topNv]
-    eigVec = eigVec[:, topNv]
-    return topNv, eigVal, eigVec
+    topweights = eigVec[:, topNv]
+    botweights = eigVec[:, botNv]
+    return topNv, topweights, botweights
 
 
 def matrix_to_vec(matrix):
@@ -58,7 +59,7 @@ def generate_matrix_im(coils):
     return matrix
 
 
-def filter_coils(coils):
+def filter_coils(coils, sigma=15):
     """Apply an extreme gaussian filter to all coils
 
     Going through each coil, we apply a strong gaussian filter
@@ -69,7 +70,7 @@ def filter_coils(coils):
     new_coils = np.zeros(coils.shape)
     for i in range(coils.shape[-1]):
         new_coils[..., i] = normalize_matrix(gaussian_filter(coils[..., i],
-                                                             sigma=15))
+                                                             sigma=sigma))
 
     return new_coils
 

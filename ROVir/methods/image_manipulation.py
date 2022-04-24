@@ -28,8 +28,12 @@ def intensity_plot(image, height, Title):
     axs[1].plot(
         np.linspace(0, image.shape[0]-1, image.shape[0]),
         image[height, :],
-        color='green'
+        color='gray'
     )
+
+    #axs[1].set_title("Intensity plot")
+    axs[1].set_xlabel('Position')
+    axs[1].set_ylabel('Intensity')
 
     im.set_clim(0, np.max(image)/2)
 
@@ -72,17 +76,17 @@ def plot_masks(image, maskA, maskB, title=''):
     plt.title(title)
 
 
-def plot_images(img1, title1, img2, title2):
+def plot_images(img1, title1, nmax1, img2, title2, nmax2):
     fig, axs = plt.subplots(1, 2)
     im1 = axs[0].imshow(img1,
                         cmap='gray')
     axs[0].set_title(title1)
-    im1.set_clim(0, np.max(img1)/2)
+    im1.set_clim(0, nmax1)
 
     im2 = axs[1].imshow(img2,
                         cmap='gray')
     axs[1].set_title(title2)
-    im2.set_clim(0, np.max(img2)/2)
+    im2.set_clim(0, nmax2)
 
 
 def plot_coils(coils, title=''):

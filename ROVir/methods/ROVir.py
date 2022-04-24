@@ -11,8 +11,7 @@ def ROVir(coils, regions, lowf):
 
     print("Filtering the image...")
     #w_coils = coils*filter_coils(coils)
-    w_coils = filter_coils(coils)
-    print(f'{w_coils[:,:,0]=}')
+    w_coils = filter_coils(coils, 20)
 
     plot_coils(w_coils)
     HEIGHT, WIDTH, NCOILS = w_coils.shape
@@ -41,9 +40,11 @@ def ROVir(coils, regions, lowf):
 
     comb = LA.inv(B)*A
 
-    topNv, eigVal, weights = calculate_eig(comb, lowf)
+    topNv, topweights, botweights = calculate_eig(comb, lowf)
 
-    v_coils = generate_virtual_coils(coils, weights, len(topNv))
+    v_coils = generate_virtual_coils(coils, topweights, len(topNv))
 
-    return v_coils
+    bot_v_coils = generate_virtual_coils(coils, botweights, len(topNv))
+
+    return v_coils, bot_v_coils
     # return w_coils
