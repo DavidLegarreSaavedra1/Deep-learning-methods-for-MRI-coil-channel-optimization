@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import h5py
 from pyparsing import line
 from methods import *
-from methods import ROVIR_im
 from icecream import ic
 
 dirs = [os.getcwd(), "data"]

@@ -2,8 +2,8 @@ import numpy as np
 import sys
 from numpy import linalg as LA, vectorize
 import matplotlib.pyplot as plt
-from methods.complex import *
-from methods.matrix_manipulation import *
+from ..methods.complex import *
+from ..methods.matrix_manipulation import *
 
 
 def ROVir_im(coils, regions, lowf=5):
