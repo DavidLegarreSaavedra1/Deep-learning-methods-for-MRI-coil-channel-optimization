@@ -1,79 +1,55 @@
-import os 
-import re
-import pydicom as dicom
+from PIL import Image
+from torch.utils.data import DataLoader, Dataset
+from pycocotools.coco import COCO
 
-class Dataset(object):
-    dataset_count = 0
+import os
+import torch
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import torchvision.transforms as T
 
-    def __init__(self, directory, subdir):
-        # deal with any intervening directories
-        while True:
-            subdirs = next(os.walk(directory))[1]
-            if len(subdirs) == 1:
-                directory = os.path.join(directory, subdirs[0])
-            else:
-                break
 
-        slices = []
-        for s in subdirs:
-            m = re.match("sax_(\d+)", s)
-            if m is not None:
-                slices.append(int(m.group(1)))
+class ChestHeartDataset(Dataset):
+    """Chest MRI image dataset"""
 
-        slices_map = {}
-        first = True
-        times = []
-        for s in slices:
-            files = next(os.walk(os.path.join(directory, "sax_%d" % s)))[2]
-            offset = None
+    def __init__(self, root, annotation_file):
+        """ Args:
 
-            for f in files:
-                m = re.match("IM-(\d{4,})-(\d{4})\.dcm", f)
-                if m is not None:
-                    if first:
-                        times.append(int(m.group(2)))
-                    if offset is None:
-                        offset = int(m.group(1))
+        root (string): path to the root of the dataset
+        filenames (string): filenames of the images
+        annotation_file (string): path to the JSON annotation file
+        """
+        self.root = root
+        #self.annotation_file = annotation_file
+        self.coco_annotation = COCO(annotation_file=annotation_file)
 
-            first = False
-            slices_map[s] = offset
+        # Only 1 category, heart, 0 would be background
+        self.img_ids = self.coco_annotation.getImgIds(catIds=1)
 
-        self.directory = directory
-        self.time = sorted(times)
-        self.slices = sorted(slices)
-        self.slices_map = slices_map
-        self.name = subdir
+    def __getitem__(self, index):
+        # Get image
+        img_id = self.img_ids[index]
+        img_info = self.coco_annotation.loadImgs([img_id])[0]
+        img_fn = img_info["file_name"]
+        img = Image.open(os.path.join(self.root, img_fn))
 
-    def _filename(self, s, t):
-        return os.path.join(self.directory,"sax_%d" % s, "IM-%04d-%04d.dcm" % (self.slices_map[s], t))
+        # Get annotations
+        ann_ids = self.coco_annotation.getAnnIds(imgIds=[img_id], iscrowd=None)
+        anns = self.coco_annotation.loadAnns(ann_ids)[0]
+        coords = anns["bbox"]
+        x0 = coords[0]
+        y0 = coords[1]
+        x1 = x0+coords[2]
+        y1 = y0+coords[3]
+        box = [x0, y0, x1, y1]
 
-    def _read_dicom_image(self, filename):
-        d = dicom.read_file(filename)
-        img = d.pixel_array
-        return np.array(img)
+        # Define target box
+        target = {}
+        target["boxes"] = torch.as_tensor(box, dtype=torch.float32)
+        target["labels"] = torch.ones((1,), dtype=torch.int64)
+        target["image_id"] = torch.tensor(img_id)
+        target["area"] = torch.as_tensor(anns["area"], dtype=torch.float32)
+        target["iscrowd"] = torch.zeros((1,), dtype=torch.int64)
 
-    def _read_all_dicom_images(self):
-        f1 = self._filename(self.slices[0], self.time[0])
-        d1 = dicom.read_file(f1)
-        (x, y) = d1.PixelSpacing
-        (x, y) = (float(x), float(y))
-        f2 = self._filename(self.slices[1], self.time[0])
-        d2 = dicom.read_file(f2)
-
-        # try a couple of things to measure distance between slices
-        try:
-            dist = np.abs(d2.SliceLocation - d1.SliceLocation)
-        except AttributeError:
-            try:
-                dist = d1.SliceThickness
-            except AttributeError:
-                dist = 8  # better than nothing...
-
-        self.images = np.array([[self._read_dicom_image(self._filename(d, i))
-                                 for i in self.time]
-                                for d in self.slices])
-        self.dist = dist
-        self.area_multiplier = x * y
-
-    def load(self):
-        self._read_all_dicom_images()
+        return img, target

@@ -1,6 +1,7 @@
 from configparser import Interpolation
 import numpy as np
 import matplotlib.pyplot as plt
+from PIL import Image as image
 
 
 def combine_images(channels):
@@ -76,6 +77,11 @@ def plot_masks(image, maskA, maskB, title=''):
     plt.title(title)
 
 
+def save_image(img, title):
+    im = image.fromarray(img)
+    im.convert('L').save(title+".png")
+
+
 def plot_images(img1, title1, nmax1, img2, title2, nmax2):
     fig, axs = plt.subplots(1, 2)
     im1 = axs[0].imshow(img1,
@@ -100,5 +106,14 @@ def plot_coils(coils, title=''):
         ax.set_title("coil: "+str(i))
         im.set_clim(0, 1)
         i += 1
-    fig.suptitle(title, fontsize=16)
+    fig.suptitle(title, fontsize=12)
+    plt.subplots_adjust(
+        left=0.125,
+        right=0.9,
+        top=0.9,
+        bottom=0.1,
+        wspace=0.2,
+        hspace=0.4
+    )
+
     return

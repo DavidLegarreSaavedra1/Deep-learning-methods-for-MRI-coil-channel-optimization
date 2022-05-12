@@ -26,7 +26,9 @@ regions = [A_W, A_H, B1_W, B1_H, B2_W]
 H_W = slice(120, 310)
 H_H = slice(230, 400)
 
-if __name__ == '__main__':
+
+def main():
+
     img = nib.load(os.path.join(data_path, "Slice44-AllChannels.nii"))
 
     height = img.shape[0]
@@ -50,6 +52,11 @@ if __name__ == '__main__':
     nmax1 = np.max(prev_img[H_H, H_W])
     nmax2 = np.max(new_img[H_H, H_W])
 
+    save_image(
+        prev_img,
+        "prev_img"
+    )
+
     plot_images(prev_img,
                 "Before ROVir",
                 int(nmax1)*2.5,
@@ -70,3 +77,7 @@ if __name__ == '__main__':
     intensity_plot(prev_img, 270, 'Before ROVir')
     intensity_plot(new_img, 270, 'After ROVir')
     plt.show()
+
+
+if __name__ == '__main__':
+    main()
