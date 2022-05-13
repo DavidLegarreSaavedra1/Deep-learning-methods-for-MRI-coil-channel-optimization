@@ -33,6 +33,7 @@ class ChestHeartDataset(Dataset):
         img_info = self.coco_annotation.loadImgs([img_id])[0]
         img_fn = img_info["file_name"]
         img = Image.open(os.path.join(self.root, img_fn))
+        img = T.ToTensor()(img)
 
         # Get annotations
         ann_ids = self.coco_annotation.getAnnIds(imgIds=[img_id], iscrowd=None)
@@ -46,10 +47,13 @@ class ChestHeartDataset(Dataset):
 
         # Define target box
         target = {}
-        target["boxes"] = torch.as_tensor(box, dtype=torch.float32)
+        target["boxes"] = torch.as_tensor([box], dtype=torch.float32)
         target["labels"] = torch.ones((1,), dtype=torch.int64)
-        target["image_id"] = torch.tensor(img_id)
+        target["image_id"] = torch.tensor([img_id])
         target["area"] = torch.as_tensor(anns["area"], dtype=torch.float32)
         target["iscrowd"] = torch.zeros((1,), dtype=torch.int64)
 
         return img, target
+
+    def __len__(self):
+        return len(self.img_ids)
