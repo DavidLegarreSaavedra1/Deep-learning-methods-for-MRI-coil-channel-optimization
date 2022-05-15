@@ -46,9 +46,9 @@ class ChestHeartDataset(Dataset):
 
         # Define target box
         target = {}
-        target["boxes"] = torch.as_tensor(box, dtype=torch.float32)
+        target["boxes"] = torch.as_tensor([box], dtype=torch.float32)
         target["labels"] = torch.ones((1,), dtype=torch.int64)
-        target["image_id"] = torch.tensor(img_id)
+        target["image_id"] = torch.tensor([img_id])
         target["area"] = torch.as_tensor(anns["area"], dtype=torch.float32)
         target["iscrowd"] = torch.zeros((1,), dtype=torch.int64)
 
