@@ -21,3 +21,7 @@ class HeartDetectorNet(nn.Module):
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
+
+
+def training_fn(training_data, model, optimizer, loss_fn):
+    return

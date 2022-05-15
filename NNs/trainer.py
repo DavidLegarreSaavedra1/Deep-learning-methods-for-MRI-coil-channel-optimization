@@ -40,29 +40,22 @@ if __name__ == '__main__':
     else:
         device = torch.device('cpu')
 
+    print(device)
+
+    imgs, annotations = next(iter(data_loader))
+    imgs = list(img.to(device) for img in imgs)
+    annotations = [{k: v.to(device) for k, v in b.items()}
+                   for b in annotations]
+
     net.to(device)
-    n_epochs = 10
 
-    for epoch in range(2):
-        net.train()
-        i = 0
-        for imgs, annotations in data_loader:
-            i += 1
-            imgs = list(img.to(device) for img in imgs)
-            annotations = [{k: v.to(device) for k, v in b.items()}
-                           for b in annotations]
 
-            # zero the gradients
-            optimizer.zero_grad()
+    out = net(imgs)
+    print(f'{out=}')
+    
+    
+    
+    
 
-            # forward
-            output = net(imgs)
-            loss = criterion(output, annotations)
-            loss.backward()
-            optimizer.step()
 
-            # print statistics
-            running_loss += loss.item()
-            if i % 2000 == 1999:    # print every 2000 mini-batches
-                print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.3f}')
-                running_loss = 0.0
+    
