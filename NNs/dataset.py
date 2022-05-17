@@ -52,7 +52,8 @@ class ChestHeartDataset(Dataset):
         target["area"] = torch.as_tensor(anns["area"], dtype=torch.float32)
         target["iscrowd"] = torch.zeros((1,), dtype=torch.int64)
 
-        return img, target
+        #return img, target
+        return img, target["boxes"]
 
     def __len__(self):
         return len(self.img_ids)
