@@ -14,8 +14,8 @@ data_path = os.path.join(*dirs)
 A_W = slice(100, 350)
 B1_W = slice(0, 90)
 B2_W = slice(430, -1)
-A_H = slice(220, 410)
-B1_H = slice(90, 440)
+A_H = slice(220, 390)
+B1_H = slice(80, 450)
 
 LINE = 300
 DEBUGGING = False
@@ -37,7 +37,12 @@ def main():
     # lowf = int(input("lowf = "))
     lowf = 15
 
-    img_np = np.array(img.dataobj)
+    img_np = np.transpose(
+        np.array(img.dataobj), 
+        axes=(0,2,1)
+    )
+    #img_np.transpose(0,2,1)
+    
 
     prev_img = combine_images(img_np)
 
@@ -56,13 +61,19 @@ def main():
         prev_img,
         "prev_img"
     )
+    
+    plot_image(
+        prev_img,
+        save=True
+    )
 
     plot_images(prev_img,
                 "Before ROVir",
                 int(nmax1)*2.5,
                 new_img,
                 "After ROVir",
-                int(nmax2)*2
+                int(nmax2)*2,
+                save=True
                 )
 
     plot_images(
@@ -74,8 +85,11 @@ def main():
         int(nmax1)*2.5
     )
 
-    intensity_plot(prev_img, 270, 'Before ROVir')
-    intensity_plot(new_img, 270, 'After ROVir')
+    plot_intensities(
+        prev_img, new_img, 
+        267, save=True
+    )
+    plt.tight_layout()
     plt.show()
 
 

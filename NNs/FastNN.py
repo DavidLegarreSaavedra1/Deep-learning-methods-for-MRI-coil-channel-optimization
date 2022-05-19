@@ -4,13 +4,13 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class _FastNN(nn.Module):
-
+    # Input images of size 512 512
     def __init__(self):
         super().__init__()
         self.conv1 = nn.Conv2d(1, 6, 5)
         self.pool = nn.MaxPool2d(2,2)
         self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(387096, 120)
+        self.fc1 = nn.Linear(16 * 125 * 125 , 120)
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 32)
         self.bb = nn.Linear(32, 4) 
@@ -44,34 +44,3 @@ class FastNN(nn.Module):
     def forward(self, x):
         return self.network(x)
         
-class Cifar10CnnModel(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.network = nn.Sequential(
-            nn.Conv2d(1, 32, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2, 2), # output: 64 x 16 x 16
-
-            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2, 2), # output: 128 x 8 x 8
-
-            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2, 2), # output: 256 x 4 x 4
-
-            nn.Flatten(), 
-            nn.Linear(256*4*4, 1024),
-            nn.ReLU(),
-            nn.Linear(1024, 512),
-            nn.ReLU(),
-            nn.Linear(512, 4))
-        
-    def forward(self, xb):
-        return self.network(xb)

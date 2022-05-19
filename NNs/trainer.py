@@ -1,4 +1,4 @@
-from FastNN import Cifar10CnnModel, FastNN
+from FastNN import _FastNN, FastNN
 from nn import *
 from dataset import *
 from pathlib import Path as path
@@ -19,8 +19,9 @@ if __name__ == '__main__':
     heart_dataset = ChestHeartDataset(root_data_path, training_ann)
 
     # Network
+    torch.cuda.memory_summary(device=None, abbreviated=False)
 
-    net = FastNN().cuda()
+    net = _FastNN().cuda()
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(
@@ -29,7 +30,7 @@ if __name__ == '__main__':
         momentum=0.9
     )
 
-    batch_size = 64
+    batch_size = 32
     data_loader = torch.utils.data.DataLoader(
         heart_dataset,
         batch_size=batch_size,
@@ -42,9 +43,13 @@ if __name__ == '__main__':
         device = torch.device('cpu')
 
     print(device)
-
+    dataiter = iter(data_loader)
+    images, labels = dataiter.next()
+    # show images
+    print(images.shape)
+    print(labels.shape)
     # Parameters for training
-    epochs = 2
+    epochs = 4
     parameters = filter(lambda p: p.requires_grad, model.parameters())
     optimizer = torch.optim.Adam(
         parameters, lr=0.006

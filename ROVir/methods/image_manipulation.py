@@ -39,42 +39,25 @@ def intensity_plot(image, height, Title):
     im.set_clim(0, np.max(image)/2)
 
 
-def plot_mask_A(image, mask):
-    fig, ax = plt.subplots()
-    m_h, m_w = mask
+def plot_masks(image, maskA, maskB,
+               title='', save=False):
+               
+    fig, axs = plt.subplots(1,1)
 
-    im = ax.imshow(image, cmap='gray')
-    im.set_clim(0, 1500)
-
-    ax.plot(
-        [m_w[0], m_w[1]],
-        [m_h[0], m_h[0]],
-        color='blue'
-    )
-    ax.plot(
-        [m_w[0], m_w[1]],
-        [m_h[1], m_h[1]],
-        color='blue'
-    )
-    ax.plot(
-        [m_w[0], m_w[0]],
-        [m_h[0], m_h[1]],
-        color='blue'
-    )
-    ax.plot(
-        [m_w[1], m_w[1]],
-        [m_h[0], m_h[1]],
-        color='blue'
-    )
-
-
-def plot_masks(image, maskA, maskB, title=''):
-    plt.figure()
-    im = plt.imshow(image, cmap='gray')
+    maska = np.empty((*maskA.shape, 3))
+    maska[maskA > 0] = (0.0, 1.0, 0.0)
+    
+    maskb = np.empty((*maskB.shape, 3))
+    maskb[maskB > 0] = (1.0, 0.0, 0.0)
+    
+    im = axs.imshow(image, cmap='gray')
     im.set_clim(0, np.max(image)/2)
-    plt.imshow(maskA, alpha=0.25)
-    plt.imshow(maskB, alpha=0.25)
-    plt.title(title)
+
+    axs.imshow(maska, alpha=0.5)
+    axs.imshow(maskb, alpha=0.5)
+    axs.set_title(title)
+    if save:
+        plt.savefig("mask.png", transparent=True)
 
 
 def save_image(img, title):
@@ -82,7 +65,8 @@ def save_image(img, title):
     im.convert('L').save(title+".png")
 
 
-def plot_images(img1, title1, nmax1, img2, title2, nmax2):
+def plot_images(img1, title1, nmax1, img2,
+                title2, nmax2, save=False):
     fig, axs = plt.subplots(1, 2)
     im1 = axs[0].imshow(img1,
                         cmap='gray')
@@ -93,6 +77,9 @@ def plot_images(img1, title1, nmax1, img2, title2, nmax2):
                         cmap='gray')
     axs[1].set_title(title2)
     im2.set_clim(0, nmax2)
+    
+    if save:
+        plt.savefig("comparing_imgs.png", transparent=True)
 
 
 def plot_coils(coils, title=''):
@@ -116,4 +103,58 @@ def plot_coils(coils, title=''):
         hspace=0.4
     )
 
-    return
+def plot_intensities(img1, img2, height, save=False):
+    #fig, axs = plt.subplots(1,2)
+
+    ax0 = plt.subplot(221)
+    ax0.imshow(
+        img1, cmap='gray'
+    )
+    ax0.plot(
+        [0, img1.shape[0]-1],
+        [height, height],
+        color='red'
+    )
+    ax0.set_title('Before ROVir')
+    
+    ax1 = plt.subplot(222)
+    ax1.imshow(
+        img2, cmap='gray'
+    )
+    ax1.plot(
+        [0, img2.shape[0]-1],
+        [height, height],
+        color='green'
+    )
+    ax1.set_title('After ROVir')
+
+    ax2 = plt.subplot(212)
+    line1, = ax2.plot(
+        np.linspace(0, img1.shape[0]-1, img1.shape[0]),
+        img1[height, :],
+        color='red'
+    )
+    
+    line2, = ax2.plot(
+        np.linspace(0, img2.shape[0]-1, img2.shape[0]),
+        img2[height, :],
+        color='green'
+    )
+    
+    ax2.set_xlabel("Position")
+    ax2.set_ylabel("Intensity")
+    ax2.legend([line1, line2], ["Before ROVir", "Afer ROVir"])
+    if save:
+        plt.savefig("intensities.png", transparent=True)
+    
+
+def plot_image(img1, title='', save=False):
+    fig = plt.figure()
+    ax = plt.subplot(111)
+    nmax = np.max(img1)
+
+    im = ax.imshow(img1, cmap='gray')
+    ax.set_title(title)
+    im.set_clim(0, nmax)
+    if save:
+        plt.savefig("image.png", transparent=True)
