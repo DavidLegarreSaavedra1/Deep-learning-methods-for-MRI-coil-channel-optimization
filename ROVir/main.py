@@ -14,7 +14,7 @@ data_path = os.path.join(*dirs)
 A_W = slice(100, 350)
 B1_W = slice(0, 90)
 B2_W = slice(430, -1)
-A_H = slice(220, 390)
+A_H = slice(120, 290)
 B1_H = slice(80, 450)
 
 LINE = 300
@@ -30,18 +30,18 @@ H_H = slice(230, 400)
 def main():
 
     img = nib.load(os.path.join(data_path, "Slice44-AllChannels.nii"))
+    print(type(img))
 
     height = img.shape[0]
     width = img.shape[1]
     num_coils = img.shape[2]
     # lowf = int(input("lowf = "))
-    lowf = 15
+    lowf = 12
 
-    img_np = np.transpose(
-        np.array(img.dataobj), 
-        axes=(0,2,1)
-    )
-    #img_np.transpose(0,2,1)
+    img_np = np.array(img.dataobj)
+    img_np = np.flipud(img_np).copy()
+
+    
     
 
     prev_img = combine_images(img_np)
@@ -62,10 +62,10 @@ def main():
         "prev_img"
     )
     
-    plot_image(
-        prev_img,
-        save=True
-    )
+   # plot_image(
+   #     prev_img,
+   #     save=True
+   # )
 
     plot_images(prev_img,
                 "Before ROVir",
@@ -87,7 +87,7 @@ def main():
 
     plot_intensities(
         prev_img, new_img, 
-        267, save=True
+        247, save=True
     )
     plt.tight_layout()
     plt.show()
