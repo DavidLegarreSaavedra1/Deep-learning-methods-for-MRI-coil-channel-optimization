@@ -45,15 +45,10 @@ class ChestHeartDataset(Dataset):
         box = [x0, y0, x1, y1]
 
         # Define target box
-        target = {}
-        target["boxes"] = torch.as_tensor(box, dtype=torch.float32)
-        target["labels"] = torch.ones((1,), dtype=torch.int64)
-        target["image_id"] = torch.tensor([img_id])
-        target["area"] = torch.as_tensor(anns["area"], dtype=torch.float32)
-        target["iscrowd"] = torch.zeros((1,), dtype=torch.int64)
+        bboxes = torch.as_tensor(box, dtype=torch.float32)
 
         #return img, target
-        return img, target["boxes"]
+        return img, bboxes
 
     def __len__(self):
         return len(self.img_ids)

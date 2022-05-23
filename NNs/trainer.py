@@ -1,12 +1,14 @@
-from FastNN import _FastNN, FastNN
-from nn import *
-from dataset import *
+from methods.neural_network.FastNN import *
 from pathlib import Path as path
+from methods.dataset import ChestHeartDataset
+from methods.visualization import *
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
 import torch.nn.functional as F
+import methods.benchmarking
+
 
 
 
@@ -15,13 +17,12 @@ if __name__ == '__main__':
     root_data_path = path.cwd() / 'data' / 'heart_augmented_COCO'
     print(path.cwd())
     training_ann = root_data_path / 'train.json'
+    testing_ann = root_data_path / 'test.json'
 
-    heart_dataset = ChestHeartDataset(root_data_path, training_ann)
+    train_heart_dataset = ChestHeartDataset(root_data_path, training_ann)
+    test_heart_dataset = ChestHeartDataset(root_data_path, testing_ann)
 
-    # Network
-    torch.cuda.memory_summary(device=None, abbreviated=False)
-
-    net = _FastNN().cuda()
+    net = FastNN().cuda()
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(
@@ -31,10 +32,16 @@ if __name__ == '__main__':
     )
 
     batch_size = 32
-    data_loader = torch.utils.data.DataLoader(
-        heart_dataset,
+    training_data_loader = torch.utils.data.DataLoader(
+        train_heart_dataset,
         batch_size=batch_size,
-        shuffle=True
+        shuffle=True,
+    )
+
+    testing_data_loader = torch.utils.data.DataLoader(
+        test_heart_dataset,
+        batch_size=batch_size,
+        shuffle=True,
     )
 
     if torch.cuda.is_available():
@@ -42,39 +49,18 @@ if __name__ == '__main__':
     else:
         device = torch.device('cpu')
 
-    print(device)
-    dataiter = iter(data_loader)
-    images, labels = dataiter.next()
-    # show images
-    print(images.shape)
-    print(labels.shape)
+    img, bbox = next(iter(training_data_loader))
+
     # Parameters for training
     epochs = 4
-    parameters = filter(lambda p: p.requires_grad, model.parameters())
+    parameters = filter(lambda p: p.requires_grad, net.parameters())
+    
     optimizer = torch.optim.Adam(
-        parameters, lr=0.006
+        parameters, lr=0.005
     )
 
-    # Training
-    idx = 0
-    for i in range(epochs):
-        net.train()
-        total = 0
-        sum_loss = 0
-        for img, bbox in data_loader:
-            #print(img)
-            batch = len(img)
-            img = img.cuda().float()
-            bbox = bbox.cuda().float() 
-            out_bb = net(img)
-            
-            loss_bb = F.l1_loss(out_bb, bbox)
-            loss_bb = loss_bb.sum()
-            optimizer.zero_grad()
-            loss_bb.backward()
-            optimizer.step()
-            idx += 1
-            total += batch
-            sum_loss += loss_bb.item()
-        train_loss = sum_loss/total
-        print(f"Train_loss: {train_loss}")
+   # train_nn(net, epochs, training_data_loader, optimizer)
+   # torch.save(net.state_dict(), root_data_path / 'net.pth') 
+    net.load_state_dict(torch.load(root_data_path / 'net.pth'))
+    
+    data_testing(net, testing_data_loader)

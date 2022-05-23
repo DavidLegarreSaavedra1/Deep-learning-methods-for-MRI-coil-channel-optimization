@@ -59,7 +59,7 @@ def generate_matrix_im(coils):
     return matrix
 
 
-def filter_coils(coils, sigma=15):
+def filter_coils(coils, sigma=25):
     """Apply an extreme gaussian filter to all coils
 
     Going through each coil, we apply a strong gaussian filter
@@ -78,7 +78,6 @@ def filter_coils(coils, sigma=15):
 def generate_virtual_coils(coils, weights, topNv):
     v_coils = np.zeros(coils.shape)
     ncoils = coils.shape[-1]
-
     for j in range(topNv):
         total = 0
         for l in range(ncoils):

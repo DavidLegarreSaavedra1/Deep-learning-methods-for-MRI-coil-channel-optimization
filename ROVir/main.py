@@ -84,10 +84,10 @@ def main():
         "Bottom coils",
         int(nmax1)*2.5
     )
-
+    
     plot_intensities(
         prev_img, new_img, 
-        247, save=True
+        242, save=True
     )
     plt.tight_layout()
     plt.show()
