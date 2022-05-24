@@ -11,16 +11,18 @@ class FastNN(nn.Module):
     # Input images of size 512 512
     def __init__(self):
         super(FastNN, self).__init__()
-        self.conv1 = nn.Conv2d(1, 6, 5)
-        self.pool = nn.MaxPool2d(2,2)
-        self.conv2 = nn.Conv2d(6, 16, 5)
-        self.conv3 = nn.Conv2d(16, 32, 5)
-        self.conv4 = nn.Conv2d(32, 64, 5)
-        self.conv5 = nn.Conv2d(64, 192, 5)
-        self.fc1 = nn.Linear(192 * 27 * 27 , 240)
+        # Input 1 * 512 * 512 B&W
+        self.conv1 = nn.Conv2d(1, 6, 5) # 6 * 254 * 254
+        self.conv2 = nn.Conv2d(6, 16, 5) # 16 * 125 * 125
+        self.conv3 = nn.Conv2d(16, 32, 5) # 32 * 60 * 60
+        self.conv4 = nn.Conv2d(32, 64, 5) # 64 * 28 * 28
+        self.conv5 = nn.Conv2d(64, 192, 5) # 192 * 12 * 12
+        self.fc1 = nn.Linear(192 * 12 * 12 , 240)
         self.fc2 = nn.Linear(240, 120)
         #self.fc3 = nn.Linear(120, 32)
         self.bb = nn.Linear(120, 4) 
+
+        self.pool = nn.MaxPool2d(2,2)
     
     def forward(self, x):
         
@@ -34,7 +36,7 @@ class FastNN(nn.Module):
 
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
+        #x = F.relu(self.fc3(x))
 
         x = torch.sigmoid(self.bb(x))
 
