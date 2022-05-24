@@ -26,6 +26,7 @@ class FastNN(nn.Module):
         self.bn1 = nn.BatchNorm2d(6)
         self.bn2 = nn.BatchNorm2d(16)
 
+        self.loss = nn.L1Loss()
     
     def forward(self, x):
         
@@ -39,7 +40,6 @@ class FastNN(nn.Module):
 
         x = torch.flatten(x, 1)
 
-        x = self.avgpool(x)
 
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
@@ -72,33 +72,33 @@ def train_nn(net, n_epochs,
         start = time.time()
         for batch, (img, bbox) in enumerate(train_data_loader):
             #print(img)
-            batch = len(img)
             #img = img.cuda().float()
             #bbox = bbox.cuda().float() 
             img, bbox = img.to(device), bbox.to(device)
             optimizer.zero_grad()
             out_bb = net(img)
 
-            #loss_bb = F.smooth_l1_loss(out_bb, bbox)
+            #loss_bb = torch.cdist(out_bb, bbox)
+            loss_bb = net.loss(out_bb, bbox)
             #loss_bb = F.mse_loss(out_bb, bbox)
-            loss_bb = IoU_loss(out_bb, bbox)
-            #loss_bb = loss_bb.sum()
+            #loss_bb = IoU_loss(out_bb, bbox)
+            loss_bb = loss_bb.sum()
             loss_bb.backward()
             optimizer.step()
             print("Train batch:", batch+1, " epoch: ", epoch, " ",
-                  (time.time()-start)/60, end='\r')
+                  (time.time()-start), end='\r')
 
-        net.eval()
-        for batch, (img, bbox) in enumerate(eval_data_loader):
-            img, bbox = img.to(device), bbox.to(device)
-            
-            optimizer.zero_grad()
-            with torch.no_grad():
-                out_bb = net(img)
-                loss_bb = IoU_loss(out_bb, bbox)
-            total_loss += loss_bb.item()
-            print("Test batch:", batch+1, " epoch: ", epoch, " ",
-                  (time.time()-start)/60, end='\r')
+        #net.eval()
+        #for batch, (img, bbox) in enumerate(eval_data_loader):
+        #    img, bbox = img.to(device), bbox.to(device)
+        #    
+        #    optimizer.zero_grad()
+        #    with torch.no_grad():
+        #        out_bb = net(img)
+        #        loss_bb = IoU_loss(out_bb, bbox)
+        #    total_loss += loss_bb.item()
+        #    print("Test batch:", batch+1, " epoch: ", epoch, " ",
+        #          (time.time()-start)/60, end='\r')
 
         print("Epoch", epoch, "loss:",
               total_loss, " time: ", (time.time()-start)/60, " mins")
