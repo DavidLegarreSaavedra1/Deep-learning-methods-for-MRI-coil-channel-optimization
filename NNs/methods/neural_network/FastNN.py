@@ -23,16 +23,23 @@ class FastNN(nn.Module):
         self.bb = nn.Linear(120, 4) 
 
         self.pool = nn.MaxPool2d(2,2)
+        self.bn1 = nn.BatchNorm2d(6)
+        self.bn2 = nn.BatchNorm2d(16)
+
     
     def forward(self, x):
         
         x = self.pool(F.relu(self.conv1(x)))
+        x = self.bn1(x)
         x = self.pool(F.relu(self.conv2(x)))
+        x = self.bn2(x)
         x = self.pool(F.relu(self.conv3(x)))
         x = self.pool(F.relu(self.conv4(x)))
         x = self.pool(F.relu(self.conv5(x)))
 
         x = torch.flatten(x, 1)
+
+        x = self.avgpool(x)
 
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
@@ -48,7 +55,7 @@ def IoU_loss(predict_bbox, target_bbox, smooth=1e-6):
 
     loss = torchvision.ops.box_iou(predict_bbox, target_bbox)
 
-    #loss = torch.clamp(loss, min=-1, max=1)
+    loss = torch.clamp(loss, min=-1, max=1)
     loss = 1 - loss
     
     return loss.mean()
@@ -60,8 +67,6 @@ def train_nn(net, n_epochs,
     # Training
     idx = 0
     total_loss = 0
-    epochs = []
-    losses = []
     for epoch in range(n_epochs):
         net.train()
         start = time.time()
@@ -95,8 +100,6 @@ def train_nn(net, n_epochs,
             print("Test batch:", batch+1, " epoch: ", epoch, " ",
                   (time.time()-start)/60, end='\r')
 
-        epochs.append(epoch)
-        losses.append(total_loss)
         print("Epoch", epoch, "loss:",
               total_loss, " time: ", (time.time()-start)/60, " mins")
 

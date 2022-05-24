@@ -41,11 +41,11 @@ if __name__ == '__main__':
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(
         net.parameters(),
-        lr=0.001,
+        lr=0.1,
         momentum=0.9
     )
 
-    batch_size = 16
+    batch_size = 32
     training_data_loader = torch.utils.data.DataLoader(
         train_heart_dataset,
         batch_size=batch_size,
@@ -75,9 +75,9 @@ if __name__ == '__main__':
     epochs = 4
     parameters = filter(lambda p: p.requires_grad, net.parameters())
 
-    optimizer = torch.optim.Adam(
-        parameters, lr=0.1
-    )
+    #optimizer = torch.optim.Adam(
+    #    parameters, lr=0.1
+    #)
 
     train_nn(net, epochs, training_data_loader, validate_data_loader,optimizer, device)
     torch.save(net.state_dict(), root_data_path / 'net.pth')
