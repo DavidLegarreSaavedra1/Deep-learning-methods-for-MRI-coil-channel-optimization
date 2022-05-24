@@ -1,12 +1,16 @@
+from pyparsing import line
+from methods import *
+from icecream import ic
 from ast import Slice
+from PIL import Image
 import os
 import numpy as np
 import nibabel as nib
 import matplotlib.pyplot as plt
 import h5py
-from pyparsing import line
-from methods import *
-from icecream import ic
+import cv2 as cv
+import scipy.misc
+import matplotlib.image as mpimg
 
 dirs = [os.getcwd(), "data"]
 data_path = os.path.join(*dirs)
@@ -41,10 +45,9 @@ def main():
     img_np = np.array(img.dataobj)
     img_np = np.flipud(img_np).copy()
 
-    
-    
-
     prev_img = combine_images(img_np)
+    mpimg.imsave('test.png', prev_img, cmap='gray')
+    
 
     fig, axs = plt.subplots(1, 2)
     regions = [A_W, A_H, B1_W, B1_H, B2_W]
