@@ -10,7 +10,7 @@ matplotlib.use('TkAgg')
 
 if __name__ == '__main__':
 
-    root = "data\heart_augmented"
+    root = "data\heart_augmented_COCO"
     coco_annotation_file_path = os.path.join(os.getcwd(), root+"\\train.json")
 
     coco_annotation = COCO(annotation_file=coco_annotation_file_path)

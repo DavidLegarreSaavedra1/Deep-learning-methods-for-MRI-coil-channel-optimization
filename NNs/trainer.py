@@ -36,7 +36,8 @@ if __name__ == '__main__':
     test_heart_dataset = ChestHeartDataset(root_data_path, testing_ann)
     validate_heart_dataset = ChestHeartDataset(root_data_path, validate_ann)
 
-    net = FastNN().cuda()
+    net = FastNN()
+    net = net.to('cuda')
 
     criterion = nn.CrossEntropyLoss()
 
@@ -62,12 +63,12 @@ if __name__ == '__main__':
     else:
         device = torch.device('cpu')
 
-    img, bbox = next(iter(training_data_loader))
+    img, bbox, label = next(iter(training_data_loader))
 
     print(type(img))
     print(img.shape)
     # Parameters for training
-    epochs = 4
+    epochs = 20
     parameters = filter(lambda p: p.requires_grad, net.parameters())
 
     optimizer = torch.optim.Adam(
@@ -77,6 +78,7 @@ if __name__ == '__main__':
     train_nn(net, epochs, training_data_loader, validate_data_loader,optimizer, device)
     torch.save(net.state_dict(), root_data_path / 'net.pth')
     net.load_state_dict(torch.load(root_data_path / 'net.pth'))
+    net.eval()
 
     data_testing(net, testing_data_loader)
 
@@ -89,14 +91,15 @@ if __name__ == '__main__':
     test = test.unsqueeze(0)
     print(test.shape)
     test = test.cuda().float()
-    bbox_out = net(test)
+    _,bbox_out = net(test)
 
     print(f'{bbox_out.shape=}')
     test = test.squeeze(0)
     test *= 255
     test = test.type(torch.uint8)
     bbox_out = bbox_out.cpu()
-    bbox_out *= 512
+    x1, y1, x2, y2 = bbox_out[0]*512
+
     print(f'{bbox_out=}')
     test_boxes = torchvision.utils.draw_bounding_boxes(test, bbox_out, colors='red')
     print(f'{test.shape=}')
