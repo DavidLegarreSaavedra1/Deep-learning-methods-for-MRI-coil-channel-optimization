@@ -19,7 +19,7 @@ import cv2 as cv
 torch.cuda.empty_cache()
 
 N_EPOCHS = 20
-BATCH_SIZE = 32
+BATCH_SIZE = 12
 if __name__ == '__main__':
     # Dataset loader
     root_data_path = path.cwd() / 'data' / 'heart_augmented_COCO'
@@ -82,7 +82,7 @@ if __name__ == '__main__':
             .unsqueeze(0)
             .to(device)
     )
-    bbox_out = postprocess(bbox_out)
+    #bbox_out = postprocess(bbox_out)
     process_img = cv.normalize(
         process_img, None, 
         0, 255, cv.NORM_MINMAX,

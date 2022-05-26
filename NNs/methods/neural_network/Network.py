@@ -1,3 +1,4 @@
+from matplotlib.pyplot import box
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -15,10 +16,15 @@ class Network(nn.Module):
         self.conv4 = nn.Conv2d(in_channels=24, out_channels=48, kernel_size=5)
         self.conv5 = nn.Conv2d(in_channels=48, out_channels=192, kernel_size=5)
 
+
         # Connecting CNN outputs with Fully Connected layers for bounding box
         self.box_fc1 = nn.Linear(in_features=192 * 11 * 11, out_features=240)
         self.box_fc2 = nn.Linear(in_features=240, out_features=120)
         self.box_out = nn.Linear(in_features=120, out_features=4)
+
+        self.dropout = nn.Dropout(.25)
+        self.lrn  = nn.LocalResponseNorm(2)
+
 
 
     def forward(self, t):
@@ -37,6 +43,8 @@ class Network(nn.Module):
         t = self.conv4(t)
         t = F.relu(t)
         t = F.max_pool2d(t, kernel_size=2, stride=2)
+        t = self.dropout(t)
+        t = self.lrn(t)
 
         t = self.conv5(t)
         t = F.relu(t)
@@ -49,6 +57,7 @@ class Network(nn.Module):
 
         box_t = self.box_fc2(box_t)
         box_t = F.relu(box_t)
+        box_t = self.dropout(box_t)
 
         box_t = self.box_out(box_t)
         box_t = torch.sigmoid(box_t)
@@ -61,8 +70,7 @@ def train(
     valdataloader, device
 ):
     optimizer = optim.SGD(
-        model.parameters(), lr=0.1,
-        momentum=0.9
+        model.parameters(), lr=0.001
     )
     epochs = []
     losses = []
@@ -77,7 +85,7 @@ def train(
             optimizer.zero_grad()
             bbox_pred = model(img)
 
-            box_loss = F.mse_loss(bbox_pred, bbox)
+            box_loss = nn.CrossEntropyLoss()(bbox_pred, bbox)
             box_loss.backward()
 
             optimizer.step()
