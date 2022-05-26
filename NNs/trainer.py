@@ -1,4 +1,7 @@
+from multiprocessing.connection import deliver_challenge
 from tabnanny import process_tokens
+
+from py import process
 from methods.neural_network.FastNN import *
 from pathlib import Path as path
 from methods import *
@@ -16,7 +19,7 @@ import cv2 as cv
 torch.cuda.empty_cache()
 
 N_EPOCHS = 20
-BATCH_SIZE = 4
+BATCH_SIZE = 32
 if __name__ == '__main__':
     # Dataset loader
     root_data_path = path.cwd() / 'data' / 'heart_augmented_COCO'
@@ -68,14 +71,37 @@ if __name__ == '__main__':
     net.eval()
 
     print("Test image")
-    test = cv.imread('test.png', 0)
+    test_path = path.cwd() / 'test.png'
+    test = cv.imread(test_path.as_posix())
     process_img = preprocess(test)
+    print(process_img.shape)
     bbox_out = net(
         torch.from_numpy(
             process_img
-        ).float().to(device)
+            ).float()
+            .unsqueeze(0)
+            .to(device)
     )
-
     bbox_out = postprocess(bbox_out)
+    process_img = cv.normalize(
+        process_img, None, 
+        0, 255, cv.NORM_MINMAX,
+        cv.CV_8U
+    )
+    process_img = torch.from_numpy(
+        process_img).to(device)
+    bbox_out = torch.tensor(
+        list(bbox_out)
+    ).unsqueeze(0)
+    print(process_img.shape)
+    print(bbox_out.shape)
+    print(bbox_out)
 
-    draw_bbox(process_img, bbox_out)
+    result = torchvision.utils.draw_bounding_boxes(
+        process_img,
+        bbox_out,
+        colors='red',
+        width=5
+    )
+    show(result)
+    plt.show()
