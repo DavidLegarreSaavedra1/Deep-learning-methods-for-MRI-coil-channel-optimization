@@ -110,7 +110,7 @@ def train_Heartnn(
 
         running_vloss = 0.0
         for i, vdata in enumerate(val_loader):
-            vinputs, vlabels = vdata
+            vinputs, vlabels, _ = vdata
             voutputs = model(vinputs)
             vloss = loss_fn(voutputs, vlabels)
             running_vloss += vloss
