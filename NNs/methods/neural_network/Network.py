@@ -1,6 +1,8 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch
+import torch.optim as optim
+import time
 
 class Network(nn.Module):
     def __init__(self):
@@ -67,3 +69,50 @@ class Network(nn.Module):
         box_t = F.sigmoid(box_t)
 
         return box_t
+
+
+def train(
+    model, n_epochs, dataloader,
+    valdataloader, device
+):
+    optimizer = optim.SGD(
+        model.parameters(), lr=0.1,
+        momentum=0.9
+    )
+    epochs = []
+    losses = []
+
+    for epoch in range(n_epochs):
+        tot_loss = 0
+        train_start = time.time()
+        model.train()
+        for batch, (img, bbox, label) in enumerate(dataloader):
+            img, bbox = img.to(device), bbox.to(device)
+
+            optimizer.zero_grad()
+            bbox_pred = model(img)
+
+            box_loss = F.mse_loss(bbox_pred, bbox)
+            box_loss.backward()
+
+            optimizer.step()
+            print("Train batch:", batch+1, " epoch: ", epoch, " ",
+                    (time.time()-train_start)/60, end='\r')
+        
+        model.eval()
+        for batch, (img, bbox, label) in enumerate(valdataloader):
+            img, bbox = img.to(device), bbox.to(device)
+
+            optimizer.zero_grad()
+            with torch.no_grad():
+                bbox_pred = model(img)
+
+                box_loss = F.mse_loss(bbox_pred, bbox)
+            
+            tot_loss += box_loss.item()
+            print("Test batch:", batch+1, " epoch: ", " ",
+                    (time.time()-train_start)/60, end='\r')
+        epochs.append(epoch)
+        losses.append(tot_loss)
+        print("Epoch", epoch, "Loss: ", tot_loss,
+                "time: ", (time.time()-train_start)/60, " mins")

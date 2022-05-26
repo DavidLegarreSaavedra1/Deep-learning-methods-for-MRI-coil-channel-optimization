@@ -1,3 +1,4 @@
+from tabnanny import process_tokens
 from methods.neural_network.FastNN import *
 from pathlib import Path as path
 from methods import *
@@ -15,8 +16,7 @@ import cv2 as cv
 torch.cuda.empty_cache()
 
 N_EPOCHS = 20
-
-
+BATCH_SIZE = 4
 if __name__ == '__main__':
     # Dataset loader
     root_data_path = path.cwd() / 'data' / 'heart_augmented_COCO'
@@ -29,24 +29,23 @@ if __name__ == '__main__':
     test_heart_dataset = ChestHeartDataset(root_data_path, testing_ann)
     validate_heart_dataset = ChestHeartDataset(root_data_path, validate_ann)
 
-    net = HeartNN()
+    net = Network()
 
     criterion = nn.CrossEntropyLoss()
 
-    batch_size = 4
     training_data_loader = torch.utils.data.DataLoader(
         train_heart_dataset,
-        batch_size=batch_size,
+        batch_size=BATCH_SIZE,
         shuffle=True,
     )
     testing_data_loader = torch.utils.data.DataLoader(
         test_heart_dataset,
-        batch_size=batch_size,
+        batch_size=BATCH_SIZE,
         shuffle=True,
     )
     validate_data_loader = torch.utils.data.DataLoader(
         validate_heart_dataset,
-        batch_size=batch_size,
+        batch_size=BATCH_SIZE,
         shuffle=True,
     )
     parameters = filter(lambda p: p.requires_grad, net.parameters())
@@ -63,33 +62,20 @@ if __name__ == '__main__':
 
     # Parameters for training
 
-    train_Heartnn(net, N_EPOCHS, training_data_loader, validate_data_loader,optimizer, device)
+    train(net, N_EPOCHS, training_data_loader, validate_data_loader, device)
     torch.save(net.state_dict(), root_data_path / 'net.pth')
     net.load_state_dict(torch.load(root_data_path / 'net.pth'))
     net.eval()
 
-    data_testing(net, testing_data_loader)
-
-    #net = net.to('cpu')
-
     print("Test image")
     test = cv.imread('test.png', 0)
-    test = T.ToTensor()(test)
-    print(test.shape)
-    test = test.unsqueeze(0)
-    print(test.shape)
-    test = test.cuda().float()
-    bbox_out = net(test)
+    process_img = preprocess(test)
+    bbox_out = net(
+        torch.from_numpy(
+            process_img
+        ).float().to(device)
+    )
 
-    print(f'{bbox_out.shape=}')
-    test = test.squeeze(0)
-    test *= 255
-    test = test.type(torch.uint8)
-    bbox_out = bbox_out.cpu()
-    x1, y1, x2, y2 = bbox_out[0]*512
+    bbox_out = postprocess(bbox_out)
 
-    print(f'{bbox_out=}')
-    test_boxes = torchvision.utils.draw_bounding_boxes(test, bbox_out, colors='red')
-    print(f'{test.shape=}')
-    show(test_boxes)
-    plt.show()
+    draw_bbox(process_img, bbox_out)

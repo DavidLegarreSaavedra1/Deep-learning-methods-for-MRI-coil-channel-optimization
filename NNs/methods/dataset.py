@@ -33,6 +33,7 @@ class ChestHeartDataset(Dataset):
         img_info = self.coco_annotation.loadImgs([img_id])[0]['file_name']
         img = Image.open(os.path.join(self.root, img_info))
         img = T.ToTensor()(img)
+        #img = torch.permute(img, (0,3,1,2)).float()
 
         # Get annotations
         ann_ids = self.coco_annotation.getAnnIds(imgIds=[img_id], iscrowd=None)
