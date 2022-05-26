@@ -10,7 +10,7 @@ class HeartNN(nn.Module):
 
         self.MaxPool = nn.MaxPool2d(2, 2)
         self.relu = nn.ReLU()
-        self.softmax = nn.Softmax()
+        self.softmax = nn.Softmax(dim=1)
 
         self.conv1 = nn.Conv2d(1, 64, kernel_size=3)
         self.conv2 = nn.Conv2d(64, 64, kernel_size=3)
@@ -49,7 +49,7 @@ class HeartNN(nn.Module):
         x = self.relu(self.fc1(x))
         x = self.relu(self.fc2(x))
         x = self.relu(self.fc3(x))
-        x = self.softmax(self.fc4(x), dim=1)
+        x = self.softmax(self.fc4(x))
 
         return x
 
