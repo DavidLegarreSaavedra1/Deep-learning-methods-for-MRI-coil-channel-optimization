@@ -12,22 +12,13 @@ import torchvision.transforms as T
 import methods.benchmarking
 import cv2 as cv
 
-
-def show(imgs):
-    if not isinstance(imgs, list):
-        imgs = [imgs]
-    fix, axs = plt.subplots(ncols=len(imgs), squeeze=False)
-    for i, img in enumerate(imgs):
-        img = img.detach()
-        img = T.functional.to_pil_image(img)
-        axs[0, i].imshow(np.asarray(img))
-        axs[0, i].set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
+N_EPOCHS = 20
 
 
 if __name__ == '__main__':
     # Dataset loader
     root_data_path = path.cwd() / 'data' / 'heart_augmented_COCO'
-    print(path.cwd())
+
     training_ann = root_data_path / 'train.json'
     testing_ann = root_data_path / 'test.json'
     validate_ann = root_data_path / 'validation.json'
@@ -36,8 +27,7 @@ if __name__ == '__main__':
     test_heart_dataset = ChestHeartDataset(root_data_path, testing_ann)
     validate_heart_dataset = ChestHeartDataset(root_data_path, validate_ann)
 
-    net = FastNN()
-    net = net.to('cuda')
+    net = HeartNN()
 
     criterion = nn.CrossEntropyLoss()
 
@@ -57,25 +47,22 @@ if __name__ == '__main__':
         batch_size=batch_size,
         shuffle=True,
     )
+    parameters = filter(lambda p: p.requires_grad, net.parameters())
+    optimizer = torch.optim.SGD(
+        parameters, lr=0.1, momentum=0.9
+    )
 
     if torch.cuda.is_available():
         device = torch.device('cuda')
     else:
         device = torch.device('cpu')
 
-    img, bbox, label = next(iter(training_data_loader))
+    device = torch.device('cpu')
+    net = net.to(device)
 
-    print(type(img))
-    print(img.shape)
     # Parameters for training
-    epochs = 20
-    parameters = filter(lambda p: p.requires_grad, net.parameters())
 
-    optimizer = torch.optim.Adam(
-        net.parameters(), lr=0.1
-    )
-
-    train_nn(net, epochs, training_data_loader, validate_data_loader,optimizer, device)
+    train_Heartnn(net, N_EPOCHS, training_data_loader, validate_data_loader,optimizer, device)
     torch.save(net.state_dict(), root_data_path / 'net.pth')
     net.load_state_dict(torch.load(root_data_path / 'net.pth'))
     net.eval()
@@ -91,7 +78,7 @@ if __name__ == '__main__':
     test = test.unsqueeze(0)
     print(test.shape)
     test = test.cuda().float()
-    _,bbox_out = net(test)
+    bbox_out = net(test)
 
     print(f'{bbox_out.shape=}')
     test = test.squeeze(0)

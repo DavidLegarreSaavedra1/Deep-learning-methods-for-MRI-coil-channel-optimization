@@ -38,15 +38,15 @@ class ChestHeartDataset(Dataset):
         ann_ids = self.coco_annotation.getAnnIds(imgIds=[img_id], iscrowd=None)
         anns = self.coco_annotation.loadAnns(ann_ids)[0]
         coords = anns["bbox"]
-        #x0 = coords[0]
-        #y0 = coords[1]
-        #x1 = x0+coords[2]
-        #y1 = y0+coords[3]
-        #box = [x0, y0, x1, y1]
+        x0 = coords[0]
+        y0 = coords[1]
+        x1 = x0+coords[2]
+        y1 = y0+coords[3]
+        box = [x0, y0, x1, y1]
 
         # Define target box
-        #bboxes = torch.as_tensor(box, dtype=torch.float32)
-        bboxes = torch.as_tensor(coords, dtype=torch.float32)
+        bboxes = torch.as_tensor(box, dtype=torch.int)
+        #bboxes = torch.as_tensor(coords, dtype=torch.float32)
         labels = len(self.coco_annotation.loadAnns(ann_ids))
         labels = torch.ones((labels), dtype=torch.int64)
 

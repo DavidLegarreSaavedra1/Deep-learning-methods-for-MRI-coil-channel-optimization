@@ -30,6 +30,8 @@ class FastNN(nn.Module):
         self.bb = nn.Linear(120, 4) 
 
         self.pool = nn.MaxPool2d(2,2)
+
+        self.loss = nn.L1Loss()
     
     def forward(self, x):
         
@@ -56,10 +58,10 @@ class FastNN(nn.Module):
 
 def IoU_loss(predict_bbox, target_bbox, smooth=1e-6):
 
-    loss = torchvision.ops.generalized_box_iou_loss(predict_bbox, target_bbox)
+    loss = torchvision.ops.box_iou(predict_bbox, target_bbox)
 
     #loss = torch.clamp(loss, min=-1, max=1)
-    #loss = 1 - loss
+    loss = 1 - loss
     
     return loss.mean()
 
@@ -70,23 +72,24 @@ def train_nn(net, n_epochs,
     # Training
     idx = 0
     for epoch in range(n_epochs):
-        net.train()
+        #net.train()
         running_loss = 0
         start = time.time()
         for batch, (img, bbox, label) in enumerate(train_data_loader):
             #print(img)
             #img = img.cuda().float()
             #bbox = bbox.cuda().float() 
-            img, bbox, label = img.to(device), bbox.to(device), label.to(device)[:,0]
+            img = img.to(device)
+            bbox = bbox.to(device)
+            label = label.to(device)
             optimizer.zero_grad()
             label_pred, out_bb = net(img)
 
             label_pred = torch.max(label_pred, 1)[0]
 
             #loss_bb = torch.cdist(out_bb, bbox)
-            #loss_bb = net.loss(out_bb, bbox)
-            label_loss = F.l1_loss(label_pred, label).type(torch.float)
-            loss_bb = F.mse_loss(bbox, out_bb).type(torch.float)
+            loss_bb = IoU_loss(out_bb, bbox)
+            label_loss = F.l1_loss(label_pred, label)
             #loss_bb = IoU_loss(out_bb, bbox)
             #loss_bb = loss_bb.sum()
             loss = (label_loss+loss_bb)
