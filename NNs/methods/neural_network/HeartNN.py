@@ -1,6 +1,7 @@
 from tracemalloc import start
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torchvision
 
 
@@ -55,11 +56,10 @@ class HeartNN(nn.Module):
 
 
 def loss_fn(pred, label):
-    loss = torchvision.ops.box_iou(pred, label)
-
-    loss = 1 - loss
-
-    return loss.mean()
+    #loss = torchvision.ops.box_iou(pred, label)
+    #loss = 1 - loss
+    #return loss.sum()
+    return F.mse_loss(pred, label)
 
 
 def train_nn_one_epoch(net, train_loader, optimizer, device):
@@ -67,8 +67,6 @@ def train_nn_one_epoch(net, train_loader, optimizer, device):
     last_loss = 0
 
     for i, data in enumerate(train_loader):
-        print(type(data))
-        print(len(data))
         imgs, boxes, labels = data
 
         imgs = imgs.to(device)
@@ -76,9 +74,15 @@ def train_nn_one_epoch(net, train_loader, optimizer, device):
 
         optimizer.zero_grad()
 
-        outputs = net(imgs)
+        outputs = net(imgs)*512
+
+        print(boxes[0])
+        print(outputs)
+        print(outputs.shape)
 
         loss = loss_fn(outputs, boxes)
+        
+        print(loss)
         loss.backward()
 
         optimizer.step()

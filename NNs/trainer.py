@@ -12,6 +12,8 @@ import torchvision.transforms as T
 import methods.benchmarking
 import cv2 as cv
 
+torch.cuda.empty_cache()
+
 N_EPOCHS = 20
 
 
@@ -31,7 +33,7 @@ if __name__ == '__main__':
 
     criterion = nn.CrossEntropyLoss()
 
-    batch_size = 32
+    batch_size = 4
     training_data_loader = torch.utils.data.DataLoader(
         train_heart_dataset,
         batch_size=batch_size,
@@ -57,7 +59,6 @@ if __name__ == '__main__':
     else:
         device = torch.device('cpu')
 
-    device = torch.device('cpu')
     net = net.to(device)
 
     # Parameters for training

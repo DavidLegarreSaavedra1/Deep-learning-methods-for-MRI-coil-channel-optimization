@@ -1,3 +1,1 @@
-from methods import *
-
-net = FastNN()
+import torchvision

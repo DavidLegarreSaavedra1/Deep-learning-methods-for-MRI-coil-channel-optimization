@@ -45,7 +45,7 @@ class ChestHeartDataset(Dataset):
         box = [x0, y0, x1, y1]
 
         # Define target box
-        bboxes = torch.as_tensor(box, dtype=torch.int)
+        bboxes = torch.as_tensor(box, dtype=torch.float)
         #bboxes = torch.as_tensor(coords, dtype=torch.float32)
         labels = len(self.coco_annotation.loadAnns(ann_ids))
         labels = torch.ones((labels), dtype=torch.int64)
