@@ -15,9 +15,11 @@ class HeartNN(nn.Module):
 
         self.conv1 = nn.Conv2d(1, 64, kernel_size=3)
         self.conv2 = nn.Conv2d(64, 64, kernel_size=3)
+        self.norm1 = nn.BatchNorm2d(64)
 
         self.conv3 = nn.Conv2d(64, 128, kernel_size=3)
         self.conv4 = nn.Conv2d(128, 128, kernel_size=3)
+        self.norm2 = nn.BatchNorm2d(128)
 
         self.conv5 = nn.Conv2d(128, 256, kernel_size=3)
         self.conv6 = nn.Conv2d(256, 256, kernel_size=3)
@@ -33,9 +35,11 @@ class HeartNN(nn.Module):
     def forward(self, x):
         x = self.relu(self.conv1(x))
         x = self.MaxPool(self.relu(self.conv2(x)))
+        x = self.norm1(x)
 
         x = self.relu(self.conv3(x))
         x = self.MaxPool(self.relu(self.conv4(x)))
+        x = self.norm2(x)
 
         x = self.relu(self.conv5(x))
         x = self.relu(self.conv6(x))
@@ -76,13 +80,8 @@ def train_nn_one_epoch(net, train_loader, optimizer, device):
 
         outputs = net(imgs)*512
 
-        print(boxes[0])
-        print(outputs)
-        print(outputs.shape)
-
         loss = loss_fn(outputs, boxes)
         
-        print(loss)
         loss.backward()
 
         optimizer.step()
@@ -98,7 +97,7 @@ def train_nn_one_epoch(net, train_loader, optimizer, device):
 
 def train_Heartnn(
     model, n_epochs,
-    train_loader, eval_loader,
+    train_loader, val_loader,
     optimizer, device
 ):
     for epoch in range(n_epochs):
@@ -109,3 +108,12 @@ def train_Heartnn(
         )
         model.train(False)
 
+        running_vloss = 0.0
+        for i, vdata in enumerate(val_loader):
+            vinputs, vlabels = vdata
+            voutputs = model(vinputs)
+            vloss = loss_fn(voutputs, vlabels)
+            running_vloss += vloss
+
+        avg_vloss = running_vloss / (i + 1)
+        print('LOSS train {} valid {}'.format(avg_loss, avg_vloss))
