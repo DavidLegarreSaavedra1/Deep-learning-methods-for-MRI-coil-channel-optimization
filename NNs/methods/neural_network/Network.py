@@ -7,7 +7,6 @@ import torch.optim as optim
 import torchvision
 import time
 
-from methods.neural_network.Loss import bb_intersection_over_union
 
 class Network(nn.Module):
     def __init__(self):

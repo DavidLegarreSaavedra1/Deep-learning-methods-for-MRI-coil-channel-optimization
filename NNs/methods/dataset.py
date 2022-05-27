@@ -35,7 +35,7 @@ class ChestHeartDataset(Dataset):
         img_info = self.coco_annotation.loadImgs([img_id])[0]['file_name']
         #img = Image.open(os.path.join(self.root, img_info))
         img = cv.imread(os.path.join(self.root, img_info), 0)
-        #img = cv.cvtColor(img, cv.COLOR_GRAY2BGR)
+        img = cv.cvtColor(img, cv.COLOR_GRAY2BGR)
 
         m,s = np.mean(img), np.std(img)
         preprocess = T.Compose([

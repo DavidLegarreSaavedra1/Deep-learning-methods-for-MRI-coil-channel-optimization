@@ -14,10 +14,11 @@ import copy
 from pathlib import Path as path
 
 
-BATCH_SIZE = 6
+BATCH_SIZE = 4
 
 if __name__ == '__main__':
     torch.cuda.empty_cache()
+    device = 'cuda'
     root_data_path = path.cwd() / 'data' / 'heart_augmented_COCO'
 
     training_ann = root_data_path / 'train.json'
@@ -49,12 +50,13 @@ if __name__ == '__main__':
     }
 
     model = models.resnet18(pretrained=True)
-    model = model.to('cuda')
+    model = model.to(device)
     num_ftrs = model.fc.in_features
     model.fc = nn.Linear(num_ftrs, 4)
     # Get a batch of training data
     inputs, classes, _ = next(iter(train_heart_dataset))
 
+    print(inputs.shape)
     # Make a grid from batch
     out = torchvision.utils.make_grid(inputs)
 
@@ -67,6 +69,6 @@ if __name__ == '__main__':
     
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
-    train_model(model, criterion, optimizer, exp_lr_scheduler, num_epochs=25, dataloaders=dataloaders, device='cuda')
+    train_model(model, criterion, optimizer, exp_lr_scheduler, num_epochs=25, dataloaders=dataloaders, device=device)
 
     visualize_model(model)
