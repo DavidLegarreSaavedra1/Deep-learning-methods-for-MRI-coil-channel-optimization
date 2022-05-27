@@ -18,8 +18,8 @@ import cv2 as cv
 
 torch.cuda.empty_cache()
 
-N_EPOCHS = 20
-BATCH_SIZE = 12
+N_EPOCHS = 300
+BATCH_SIZE = 16
 if __name__ == '__main__':
     # Dataset loader
     root_data_path = path.cwd() / 'data' / 'heart_augmented_COCO'
@@ -63,9 +63,24 @@ if __name__ == '__main__':
 
     net = net.to(device)
 
+    img, bbox, _ = next(iter(training_data_loader))
+    img = cv.normalize(
+        img[0].numpy(), None, 
+        0, 255, cv.NORM_MINMAX,
+        cv.CV_8U
+    )
+    img = torch.from_numpy(
+        img).to(device)
+    print(bbox[0].unsqueeze(0).shape)
+    training_result = torchvision.utils.draw_bounding_boxes(
+        img,
+        bbox[0].unsqueeze(0),
+        colors='green',
+        width=2
+    )
     # Parameters for training
 
-    train(net, N_EPOCHS, training_data_loader, validate_data_loader, device)
+    epochs, losses = train(net, N_EPOCHS, training_data_loader, validate_data_loader, device)
     torch.save(net.state_dict(), root_data_path / 'net.pth')
     net.load_state_dict(torch.load(root_data_path / 'net.pth'))
     net.eval()
@@ -82,7 +97,7 @@ if __name__ == '__main__':
             .unsqueeze(0)
             .to(device)
     )
-    #bbox_out = postprocess(bbox_out)
+    bbox_out = postprocess(bbox_out)
     process_img = cv.normalize(
         process_img, None, 
         0, 255, cv.NORM_MINMAX,
@@ -103,5 +118,7 @@ if __name__ == '__main__':
         colors='red',
         width=5
     )
+    plt.plot(epochs, losses)
     show(result)
+    show(training_result)
     plt.show()
