@@ -18,8 +18,8 @@ import cv2 as cv
 
 torch.cuda.empty_cache()
 
-N_EPOCHS = 300
-BATCH_SIZE = 16
+N_EPOCHS = 25
+BATCH_SIZE = 24
 if __name__ == '__main__':
     # Dataset loader
     root_data_path = path.cwd() / 'data' / 'heart_augmented_COCO'
@@ -71,7 +71,6 @@ if __name__ == '__main__':
     )
     img = torch.from_numpy(
         img).to(device)
-    print(bbox[0].unsqueeze(0).shape)
     training_result = torchvision.utils.draw_bounding_boxes(
         img,
         bbox[0].unsqueeze(0),
@@ -79,6 +78,8 @@ if __name__ == '__main__':
         width=2
     )
     # Parameters for training
+    test_imgs, test_bboxes, _ = next(iter(testing_data_loader))
+
 
     epochs, losses = train(net, N_EPOCHS, training_data_loader, validate_data_loader, device)
     torch.save(net.state_dict(), root_data_path / 'net.pth')
@@ -108,17 +109,16 @@ if __name__ == '__main__':
     bbox_out = torch.tensor(
         list(bbox_out)
     ).unsqueeze(0)
-    print(process_img.shape)
-    print(bbox_out.shape)
-    print(bbox_out)
-
     result = torchvision.utils.draw_bounding_boxes(
         process_img,
         bbox_out,
         colors='red',
-        width=5
+        width=2
     )
-    plt.plot(epochs, losses)
+    fig, ax = plt.subplots(1,1)
+    ax.plot(epochs, losses)
+    ax.set_xlabel("Epochs")
+    ax.set_ylabel("Loss")
     show(result)
     show(training_result)
     plt.show()

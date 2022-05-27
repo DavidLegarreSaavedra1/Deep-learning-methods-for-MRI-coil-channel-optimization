@@ -14,8 +14,10 @@ import copy
 from pathlib import Path as path
 
 
+BATCH_SIZE = 6
 
 if __name__ == '__main__':
+    torch.cuda.empty_cache()
     root_data_path = path.cwd() / 'data' / 'heart_augmented_COCO'
 
     training_ann = root_data_path / 'train.json'
@@ -25,3 +27,46 @@ if __name__ == '__main__':
     train_heart_dataset = ChestHeartDataset(root_data_path, training_ann)
     test_heart_dataset = ChestHeartDataset(root_data_path, testing_ann)
     validate_heart_dataset = ChestHeartDataset(root_data_path, validate_ann)
+    training_data_loader = torch.utils.data.DataLoader(
+        train_heart_dataset,
+        batch_size=BATCH_SIZE,
+        shuffle=True,
+    )
+    testing_data_loader = torch.utils.data.DataLoader(
+        test_heart_dataset,
+        batch_size=BATCH_SIZE,
+        shuffle=True,
+    )
+    validate_data_loader = torch.utils.data.DataLoader(
+        validate_heart_dataset,
+        batch_size=BATCH_SIZE,
+        shuffle=True,
+    )
+    dataloaders = {
+        "train" : training_data_loader,
+        "test" : testing_data_loader,
+        "val" : validate_data_loader
+    }
+
+    model = models.resnet18(pretrained=True)
+    model = model.to('cuda')
+    num_ftrs = model.fc.in_features
+    model.fc = nn.Linear(num_ftrs, 4)
+    # Get a batch of training data
+    inputs, classes, _ = next(iter(train_heart_dataset))
+
+    # Make a grid from batch
+    out = torchvision.utils.make_grid(inputs)
+
+    imshow(out,title='test')
+
+
+
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.9)
+    
+    exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+
+    train_model(model, criterion, optimizer, exp_lr_scheduler, num_epochs=25, dataloaders=dataloaders, device='cuda')
+
+    visualize_model(model)

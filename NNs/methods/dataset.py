@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import torchvision.transforms as T
+import cv2 as cv
 
 
 class ChestHeartDataset(Dataset):
@@ -27,12 +28,21 @@ class ChestHeartDataset(Dataset):
         # Only 1 category, heart, 0 would be background
         self.img_ids = self.coco_annotation.getImgIds(catIds=1)
 
+
     def __getitem__(self, index):
         # Get image
         img_id = self.img_ids[index]
         img_info = self.coco_annotation.loadImgs([img_id])[0]['file_name']
-        img = Image.open(os.path.join(self.root, img_info))
-        img = T.ToTensor()(img)
+        #img = Image.open(os.path.join(self.root, img_info))
+        img = cv.imread(os.path.join(self.root, img_info), 0)
+        #img = cv.cvtColor(img, cv.COLOR_GRAY2BGR)
+
+        m,s = np.mean(img), np.std(img)
+        preprocess = T.Compose([
+            T.ToTensor(),
+            T.Normalize(mean=m, std=s),
+        ])
+        img = preprocess(img)
         #img = torch.permute(img, (0,3,1,2)).float()
 
         # Get annotations

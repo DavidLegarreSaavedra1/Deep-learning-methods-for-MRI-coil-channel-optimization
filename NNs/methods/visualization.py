@@ -1,4 +1,5 @@
 from PIL import Image
+from sklearn.inspection import PartialDependenceDisplay
 import torch
 import matplotlib.pyplot as plt
 import torchvision.transforms as T
@@ -50,3 +51,25 @@ def draw_bbox(img, bbox):
     #plt.figure(figsize=(10,10))
     #plt.imshow(img[:,:,::-1])
     cv.imshow("",img)
+
+def evaluate_prediction(img, pred, gt):
+    IoU = torchvision.ops.box_iou(pred, gt)
+    print(IoU)
+    img = cv.normalize(
+        img.to('cpu').numpy(), None, 
+        0, 255, cv.NORM_MINMAX,
+        cv.CV_8U
+    )
+    img = torch.from_numpy(img).to('cuda')
+    boxes = torch.zeros(2,pred.shape[1]).to('cuda')
+    boxes[0] = pred
+    boxes[1] = gt
+    colors = ['red', 'green']
+    evaluation = torchvision.utils.draw_bounding_boxes(
+        img,
+        boxes=boxes,
+        colors=colors,
+        width=2
+    )
+
+    show(evaluation)
