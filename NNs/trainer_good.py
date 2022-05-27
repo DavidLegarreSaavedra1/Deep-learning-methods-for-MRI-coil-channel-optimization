@@ -18,7 +18,7 @@ BATCH_SIZE = 4
 
 if __name__ == '__main__':
     torch.cuda.empty_cache()
-    device = 'cuda'
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     root_data_path = path.cwd() / 'data' / 'heart_augmented_COCO'
 
     training_ann = root_data_path / 'train.json'
@@ -31,16 +31,19 @@ if __name__ == '__main__':
     training_data_loader = torch.utils.data.DataLoader(
         train_heart_dataset,
         batch_size=BATCH_SIZE,
+        num_workers = 4,
         shuffle=True,
     )
     testing_data_loader = torch.utils.data.DataLoader(
         test_heart_dataset,
         batch_size=BATCH_SIZE,
+        num_workers = 4,
         shuffle=True,
     )
     validate_data_loader = torch.utils.data.DataLoader(
         validate_heart_dataset,
         batch_size=BATCH_SIZE,
+        num_workers = 4,
         shuffle=True,
     )
     dataloaders = {
@@ -50,9 +53,9 @@ if __name__ == '__main__':
     }
 
     model = models.resnet18(pretrained=True)
-    model = model.to(device)
     num_ftrs = model.fc.in_features
     model.fc = nn.Linear(num_ftrs, 4)
+    model = model.to(device)
     # Get a batch of training data
     inputs, classes, _ = next(iter(train_heart_dataset))
 

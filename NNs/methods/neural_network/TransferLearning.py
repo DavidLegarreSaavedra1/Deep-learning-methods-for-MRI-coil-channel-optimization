@@ -35,7 +35,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25, dataloade
             running_loss = 0.0
             running_corrects = 0
             # Iterate over data.
-            for inputs, labels, _ in dataloaders[phase]:
+            for inputs, labels, tmp in dataloaders[phase]:
                 inputs = inputs.to(device)
                 labels = labels.to(device)
 
