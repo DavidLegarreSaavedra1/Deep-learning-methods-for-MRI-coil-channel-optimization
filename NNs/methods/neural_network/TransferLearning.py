@@ -63,7 +63,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25, dataloade
             epoch_loss = running_loss / dataset_sizes[phase]
             #epoch_acc = running_corrects.double() / dataset_sizes[phase]
 
-            print(f'{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}')
+            print(f'{phase} Loss: {epoch_loss:.4f}')
 
             # deep copy the model
             if phase == 'val':
@@ -92,14 +92,14 @@ def imshow(inp, title=None):
     plt.pause(0.001)  # pause a bit so that plots are updated
 
 
-def visualize_model(model, num_images=6, device='cuda'):
+def visualize_model(model, dataloaders, num_images=6, device='cuda'):
     was_training = model.training
     model.eval()
     images_so_far = 0
     fig = plt.figure()
 
     with torch.no_grad():
-        for i, (inputs, labels) in enumerate(dataloaders['val']):
+        for i, (inputs, labels, _) in enumerate(dataloaders['val']):
             inputs = inputs.to(device)
             labels = labels.to(device)
 

@@ -74,4 +74,4 @@ if __name__ == '__main__':
 
     train_model(model, criterion, optimizer, exp_lr_scheduler, num_epochs=25, dataloaders=dataloaders, device=device)
 
-    visualize_model(model)
+    visualize_model(model, dataloaders)
