@@ -136,4 +136,7 @@ ideas/
 results/
 *.pdf
 *.h5
+*.png
+*.jpeg
+*.jpg
 ROVIR_im.py
