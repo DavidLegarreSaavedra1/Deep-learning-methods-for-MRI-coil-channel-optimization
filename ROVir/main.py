@@ -46,8 +46,11 @@ def main():
     img_np = np.flipud(img_np).copy()
 
     prev_img = combine_images(img_np)
-    mpimg.imsave('test.png', prev_img, cmap='gray')
-    
+
+    img_ = cv.normalize(prev_img, None, alpha=0,beta=200, norm_type=cv.NORM_MINMAX)
+
+
+    cv.imwrite('prev_img.png', img_)
 
     fig, axs = plt.subplots(1, 2)
     regions = [A_W, A_H, B1_W, B1_H, B2_W]

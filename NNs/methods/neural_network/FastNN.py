@@ -1,4 +1,5 @@
 import enum
+from turtle import forward
 from matplotlib.pyplot import box
 import re
 import torch
@@ -7,119 +8,83 @@ import torch.nn.functional as F
 import torchvision
 import time
 
+
+class BasicConv2d(nn.Module):
+    def __init__(self, in_channels, out_channels, **kwargs):
+        super(BasicConv2d, self).__init__()
+        self.conv = nn.Conv2d(in_channels, out_channels, **kwargs)
+        self.relu = nn.ReLU(inplace=True)
+        self.norm = nn.BatchNorm2d(out_channels)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.drop = nn.Dropout2d(p=0.25)
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.relu(x)
+        x = self.norm(x)
+        x = self.pool(x)
+        x = self.drop(x)
+        return x
+
+
+class BasicFc(nn.Module):
+    def __init__(self, in_channels, out_channels, **kwargs) -> None:
+        super().__init__()
+        self.fc = nn.Linear(in_channels, out_channels, **kwargs)
+        self.relu = nn.ReLU(inplace=True)
+
+    def forward(self, x):
+        x = self.fc(x)
+        x = self.relu(x)
+        return x
+
+
 class FastNN(nn.Module):
     # Input images of size 512 512
     def __init__(self):
         super(FastNN, self).__init__()
-        # Input 1 * 512 * 512 B&W
-        self.conv1 = nn.Conv2d(1, 6, 5) # 6 * 254 * 254
-        self.conv2 = nn.Conv2d(6, 16, 5) # 16 * 125 * 125
-        self.conv3 = nn.Conv2d(16, 32, 5) # 32 * 60 * 60
-        self.conv4 = nn.Conv2d(32, 64, 5) # 64 * 28 * 28
-        self.conv5 = nn.Conv2d(64, 192, 5) # 192 * 12 * 12
-        
-        # Label classification
-        self.class_fc1 = nn.Linear(192 * 5 * 5, 240)
-        self.class_fc2 = nn.Linear(240, 120)
-        self.class_ = nn.Linear(120, 2)
+        # CNN phase
+        self.conv1 = BasicConv2d(1, 32, kernel_size=3)
+        self.conv2 = BasicConv2d(32, 64, kernel_size=3)
+        self.conv3 = BasicConv2d(64, 128, kernel_size=3)
+        self.conv4 = BasicConv2d(128, 256, kernel_size=3)
+        self.conv5 = BasicConv2d(256, 512, kernel_size=3)
 
-        # BBox regression
-        self.fc1 = nn.Linear(192 * 5 * 5 , 240)
-        self.fc2 = nn.Linear(240, 120)
-        #self.fc3 = nn.Linear(120, 32)
-        self.bb = nn.Linear(120, 4) 
+        # To distinguish background from heart
+        self.class1 = BasicFc(512 * 2 * 2, 256)
+        self.class2 = BasicFc(256, 128)
+        self.class3 = BasicFc(128, 64)
+        self.class4 = BasicFc(64, 32)
+        self.class_ = nn.Linear(32, 1)
 
-        self.pool = nn.MaxPool2d(2,2)
+        # To predict bounding boxes
+        self.boxc1 = BasicFc(512 * 2 * 2, 256)
+        self.boxc2 = BasicFc(256, 128)
+        self.boxc3 = BasicFc(128, 64)
+        self.boxc4 = BasicFc(64, 32)
+        self.box = nn.Linear(32, 4)
 
-        self.loss = nn.L1Loss()
-    
     def forward(self, x):
-        
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = self.pool(F.relu(self.conv3(x)))
-        x = self.pool(F.relu(self.conv4(x)))
-        x = self.pool(F.relu(self.conv5(x)))
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
+        x = self.conv4(x)
+        x = self.conv5(x)
 
-        x = F.avg_pool2d(x, kernel_size=4, stride=2)
         x = torch.flatten(x, 1)
 
-        classx = F.relu(self.class_fc1(x))
-        classx = F.relu(self.class_fc2(classx))
-        classx = F.softmax(self.class_(classx), dim=1)
+        class_pred = self.class1(x)
+        class_pred = self.class2(class_pred)
+        class_pred = self.class3(class_pred)
+        class_pred = self.class4(class_pred)
+        class_pred = self.class_(class_pred)
+        class_pred = torch.sigmoid(class_pred)
 
-        bbx = F.relu(self.fc1(x))
-        bbx = F.relu(self.fc2(bbx))
-        bbx = torch.sigmoid(self.bb(bbx))
+        box_pred = self.boxc1(x)
+        box_pred = self.boxc2(box_pred)
+        box_pred = self.boxc3(box_pred)
+        box_pred = self.boxc4(box_pred)
+        box_pred = self.box(box_pred)
+        box_pred = nn.Sigmoid()(box_pred)
 
-        return classx, bbx
-
-
-
-def IoU_loss(predict_bbox, target_bbox, smooth=1e-6):
-
-    loss = torchvision.ops.box_iou(predict_bbox, target_bbox)
-
-    #loss = torch.clamp(loss, min=-1, max=1)
-    loss = 1 - loss
-    
-    return loss.mean()
-
-
-def train_nn(net, n_epochs, 
-        train_data_loader, eval_data_loader,
-        optimizer, device):
-    # Training
-    idx = 0
-    for epoch in range(n_epochs):
-        #net.train()
-        running_loss = 0
-        start = time.time()
-        for batch, (img, bbox, label) in enumerate(train_data_loader):
-            #print(img)
-            #img = img.cuda().float()
-            #bbox = bbox.cuda().float() 
-            img = img.to(device)
-            bbox = bbox.to(device)
-            label = label.to(device)
-            optimizer.zero_grad()
-            label_pred, out_bb = net(img)
-
-            label_pred = torch.max(label_pred, 1)[0]
-
-            #loss_bb = torch.cdist(out_bb, bbox)
-            loss_bb = IoU_loss(out_bb, bbox)
-            label_loss = F.l1_loss(label_pred, label)
-            #loss_bb = IoU_loss(out_bb, bbox)
-            #loss_bb = loss_bb.sum()
-            loss = (label_loss+loss_bb)
-            loss.backward()
-            optimizer.step()
-             # Gather data and report
-            running_loss += loss.item()
-            if batch % 10 == 9:
-                last_loss = running_loss / 1000 # loss per batch
-                print('  batch {} loss: {}'.format(batch + 1, last_loss))
-                running_loss = 0.
-
-
-def data_testing(model, test_loader):
-    device='cuda'
-    dataiter = iter(test_loader)
-    images, bbox, label = dataiter.next()
-
-    images, bbox, label = images.to(device), bbox.to(device), label.to(device)[:,0]
-
-    label_pred, bbox_pred = model(images)
-
-    _, predicted = torch.max(label_pred, 1)
-
-    print(type(_))
-    
-    print(_.shape)
-
-    print(type(predicted))
-    print(predicted.shape)
-
-
-
+        return class_pred, box_pred

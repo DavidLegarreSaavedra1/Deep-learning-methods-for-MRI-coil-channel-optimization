@@ -139,4 +139,6 @@ results/
 *.png
 *.jpeg
 *.jpg
+/**/*.png
+**.png
 ROVIR_im.py

@@ -1,53 +1,52 @@
+from struct import unpack
 from telnetlib import XASCII
 import numpy as np
 import torch
 import torchvision
+import torch.nn as nn
+
+def unpack_coords(box):
+    coords = []
+    for i in range(4):
+        coords.append(
+            box[:, i]
+        )
+    x1,y1,x2,y2 = coords
+    x1 = x1.unsqueeze(1)
+    y1 = y1.unsqueeze(1)
+    x2 = x2.unsqueeze(1)
+    y2 = y2.unsqueeze(1)
+
+    return x1,y1,x2,y2
+
+def IoU_index(pred, target, smooth=1e-6):
+    pred = pred*512
+    target = target*512
+    px1, py1, px2, py2 = unpack_coords(pred)
+    tx1, ty1, tx2, ty2 = unpack_coords(target)
+
+    x1 = torch.max(px1, tx1)
+    y1 = torch.max(py1, ty1)
+    x2 = torch.min(px2, tx2)
+    y2 = torch.min(py2, ty2)
+
+    intersection = (x2 - x1).clamp(0) * (y2-y1).clamp(0)
+
+    pred_area = (px2 - px1) * (py2 - py1)
+    targ_area = (tx2 - tx1) * (ty2 - ty1)
 
 
-def intersection(a, b):
-    dx = np.min(a[0], b[0]) - np.max(a[2], b[2])
-    dy = np.min(a[1], b[1]) - np.max(a[3], b[3])
-    if (dx >= 0) and (dy >= 0):
-        return dx*dy
-    else:
-        return 0
+    return (intersection + smooth) / (pred_area+targ_area - intersection + smooth)
 
 
-def area_rect(a):
-    xside = a[0] - a[2]
-    yside = a[1] - b[3]
-    return xside*yside
+def IoU_loss(pred, target):
+    target /= 512
+    #index = 1-IoU_index(pred, target).mean()
+    #print(f"{pred[0]=}")
+    #print(f"{target[0]=}")
+    index = 1 - IoU_index(pred, target).mean()
+    #print(f"{index=}")
+    loss = nn.L1Loss()(pred, target)
+    #loss -= index
 
-
-def my_IoU(pred, target, smooth=1e-7):
-    intersec = intersection(pred, target)
-
-    area_pred = area_rect(pred)
-    are_target = area_rect(target)
-
-def bb_intersection_over_union(boxA, boxB, smooth=1e-6):
-    range_batches = torch.arange(boxA.shape[0])
-    xA = torch.maximum(boxA[range_batches,0], boxB[range_batches,0])
-    yA = torch.maximum(boxA[range_batches,1], boxB[range_batches,1])
-    xB = torch.minimum(boxA[range_batches,2], boxB[range_batches,2])
-    yB = torch.minimum(boxA[range_batches,3], boxB[range_batches,3])
-
-
-    xdif = xB-xA
-    ydif = yB-yA
-
-
-    if torch.all(xdif >= 0) and torch.all(ydif >= 0):
-        interArea = xdif*ydif
-    else:
-        interArea = 0
-    
-    boxA_area = (boxA[2] - boxA[0]+smooth) * (boxA[3]-boxA[1]+smooth)
-    boxB_area = (boxB[2] - boxB[0]+smooth) * (boxB[3]-boxB[1]+smooth)
-
-
-    iou = (interArea+smooth) / (boxA_area+boxB_area - interArea).float()
-
-    return iou
-
-
+    return loss

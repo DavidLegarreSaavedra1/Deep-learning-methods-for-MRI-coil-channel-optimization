@@ -19,38 +19,62 @@ def show(imgs):
         axs[0, i].imshow(np.asarray(img))
         axs[0, i].set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
 
+def transform_bbox(bbox):
+    x1,y1, width, height = bbox
 
-def preprocess(img, img_size = 512):
+    return x1, y1, x1+width, y1+height
+
+def preprocess(img, device, img_size = 144):
+    """Preprocess images to prepare for model    
+
+    img_size: Size of the image to resize
+    """
 
     image = cv.resize(img, (img_size, img_size))
-    image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
     image = image.astype(np.float) / 255.0
 
-    image = np.expand_dims(image, axis=0)
+    # convert image to a tensor
+    image = torch.from_numpy(
+        image
+    ).to(device).float()
+
+    print(image.shape)
+
+    # Unsqueeze tensor to add batch dimension
+    image = image.unsqueeze(0)
+    image = image.unsqueeze(0)
+
+
     return image
 
-def postprocess(results):
-    h, w = 512, 512
+def postprocess(img, bbox, device):
+    """Postprocess the output
 
-    x1, y1, width, height = results[0]
+    This function will adapt the output of the network
+    to the original dimensions of the image
+    """
+    w, h = 512, 512
+
+    print(img.shape)
+    img = torch.from_numpy(img).unsqueeze(0)
+    img = T.Resize(size=w)(img)
+
+    img = img.type(torch.uint8)
+
+
+    x1, y1, width, height = bbox[0]
 
     x1 = int(w*x1)
     y1 = int(h*y1)
     x2 = int(w*width)
     y2 = int(h*height)
 
-    return (x1,y1,x2,y2)
+    new_bbox = [x1,y1,x2,y2]
+    new_bbox = torch.tensor(
+       new_bbox, device=device 
+    ).unsqueeze(0)
 
-def draw_bbox(img, bbox):
-    x1, y1, x2, y2 = bbox
-    print(img.shape)
-    cv.rectangle(
-        img, (x1, y1), (x2, y2),
-        (0, 255, 100), 2
-    )
-    #plt.figure(figsize=(10,10))
-    #plt.imshow(img[:,:,::-1])
-    cv.imshow("",img)
+    return img, new_bbox
 
 def evaluate_prediction(img, pred, gt):
     IoU = torchvision.ops.box_iou(pred, gt)
