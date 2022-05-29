@@ -12,8 +12,8 @@ import cv2 as cv
 
 torch.cuda.empty_cache()
 
-N_EPOCHS = 50
-BATCH_SIZE = 12
+N_EPOCHS = 250
+BATCH_SIZE = 32
 IMG_SIZE = 144
 TO_TRAIN = True
 
@@ -22,53 +22,51 @@ if torch.cuda.is_available():
 else:
     device = torch.device('cpu')
 
-net = FastNN()
-net = net.to(device)
 
 if __name__ == '__main__':
     # Dataset loader
-    root_data_path = path.cwd() / 'data' / 'heart_augmented_COCO'
+    root_data_path = path.cwd() / 'data' / 'heart_augmented' 
 
-    training_ann = root_data_path / 'train.json'
-    testing_ann = root_data_path / 'test.json'
-    validate_ann = root_data_path / 'validation.json'
+    training_ann = root_data_path / 'result.json'
 
     train_transformers = nn.Sequential(
         T.Resize(size=IMG_SIZE),
         #T.Normalize((0.485),(0.229)),
     )
-    validate_transformers = nn.Sequential(
-        T.Resize(size=IMG_SIZE),
-    )
    
-    train_heart_dataset = ChestHeartDataset(
+    heart_dataset = ChestHeartDataset(
         root_data_path, training_ann, 
         transforms=train_transformers
     )
-    test_heart_dataset = ChestHeartDataset(
-        root_data_path, testing_ann
+
+    print(len(heart_dataset))
+
+    train_len = int(0.8 * len(heart_dataset))
+    test_len = int((len(heart_dataset)-train_len)/2)
+    val_len = int(len(heart_dataset)-train_len-test_len)
+
+    train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(
+        heart_dataset, [train_len, val_len, test_len]
     )
-    validate_heart_dataset = ChestHeartDataset(
-        root_data_path, validate_ann,
-        transforms=validate_transformers    
-    )
-    
 
     training_data_loader = torch.utils.data.DataLoader(
-        train_heart_dataset,
+        train_dataset,
         batch_size=BATCH_SIZE,
         shuffle=True,
     )
     testing_data_loader = torch.utils.data.DataLoader(
-        test_heart_dataset,
+        test_dataset,
         batch_size=BATCH_SIZE,
         shuffle=True,
     )
     validate_data_loader = torch.utils.data.DataLoader(
-        validate_heart_dataset,
+        val_dataset,
         batch_size=BATCH_SIZE,
         shuffle=True,
     )
+    
+    net = FastNN(heart_dataset.num_classes())
+    net = net.to(device)
 
     # Draw bounding boxes of training example
     img, bbox, _ = next(iter(testing_data_loader))

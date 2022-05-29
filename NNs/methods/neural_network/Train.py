@@ -24,8 +24,8 @@ def train(
         model.parameters(), lr=1e-5,
         momentum=0.9
     )
-    optimizer = optim.Adam(
-        model.parameters(), lr=1e-5
+    optimizer = optim.Adamax(
+        model.parameters(), lr=1e-2
     )
     epochs = []
     losses = []

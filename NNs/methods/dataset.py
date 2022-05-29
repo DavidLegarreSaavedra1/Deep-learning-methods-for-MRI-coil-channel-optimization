@@ -9,47 +9,47 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torchvision.transforms as T
 import cv2 as cv
+import json
 
 
 class ChestHeartDataset(Dataset):
     """Chest MRI image dataset"""
 
-    def __init__(self, root, annotation_file, transforms=None):
-        """ Args:
-
+    def __init__(self, root, json_file, transforms=None):
+        """ 
+        Args:
         root (string): path to the root of the dataset
-        filenames (string): filenames of the images
-        annotation_file (string): path to the JSON annotation file
+        jason_file(path): filename of the json containing all the data
+        transforms(nn.Sequential): In case some initial transformation of the data is necessary
         """
-        self.root = root
-        #self.annotation_file = annotation_file
-        self.coco_annotation = COCO(annotation_file=annotation_file)
+        self.root = root.as_posix()
 
-        # Only 1 category, heart, 0 would be background
-        self.img_ids = self.coco_annotation.getImgIds(catIds=1)
+        f = open(json_file.as_posix())
+        self.json = json.load(f)
 
+        self.images = self.json["images"]
+        self.annotations = self.json["annotations"]
         self.transforms = transforms
-
+        self.num_class = len(self.json["categories"])
 
     def __getitem__(self, index):
         # Get image
-        img_id = self.img_ids[index]
-        img_info = self.coco_annotation.loadImgs(img_id)[0]['file_name']
-        img = cv.imread(os.path.join(self.root, img_info), 0)
-
+        img_path = self.images[index]["file_name"]
+        img_path = img_path[:6] + img_path[8:]
+        img_path = self.root + '/' + img_path
+        img = cv.imread(img_path, 0)
+        #img = Image.open(img_path)
         transform = T.Compose([
             T.ToTensor(),
         ])
         img = transform(img)
         if self.transforms:
             img = self.transforms(img)
-        #img = torch.permute(img, (0,3,1,2)).float()
 
         # Get annotations
-        ann_ids = self.coco_annotation.getAnnIds(imgIds=[img_id], iscrowd=None)
-        anns = self.coco_annotation.loadAnns(ann_ids)[0]
-        coords = anns["bbox"]
-        
+        annotation = self.annotations[index]
+        coords = annotation["bbox"]
+
         x0 = coords[0]
         y0 = coords[1]
         x1 = x0+coords[2]
@@ -60,11 +60,14 @@ class ChestHeartDataset(Dataset):
         bboxes = torch.as_tensor(box, dtype=torch.float32)
 
         #bboxes = torch.as_tensor(coords, dtype=torch.float32)
-        labels = len(self.coco_annotation.loadAnns(ann_ids))
-        labels = torch.ones((labels), dtype=torch.float)
+        labels = annotation["category_id"]
+        labels = torch.tensor(labels, dtype=torch.int64)
 
-        #return img, target
+        # return img, target
         return img, bboxes, labels
 
     def __len__(self):
-        return len(self.img_ids)
+        return len(self.images)
+
+    def num_classes(self):
+        return self.num_class

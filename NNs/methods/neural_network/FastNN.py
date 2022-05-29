@@ -41,7 +41,7 @@ class BasicFc(nn.Module):
 
 class FastNN(nn.Module):
     # Input images of size 512 512
-    def __init__(self):
+    def __init__(self, num_classes):
         super(FastNN, self).__init__()
         # CNN phase
         self.conv1 = BasicConv2d(1, 32, kernel_size=3)
@@ -50,12 +50,12 @@ class FastNN(nn.Module):
         self.conv4 = BasicConv2d(128, 256, kernel_size=3)
         self.conv5 = BasicConv2d(256, 512, kernel_size=3)
 
-        # To distinguish background from heart
+        # To distinguish the slice of the heart
         self.class1 = BasicFc(512 * 2 * 2, 256)
         self.class2 = BasicFc(256, 128)
         self.class3 = BasicFc(128, 64)
         self.class4 = BasicFc(64, 32)
-        self.class_ = nn.Linear(32, 1)
+        self.class_ = nn.Linear(32, num_classes)
 
         # To predict bounding boxes
         self.boxc1 = BasicFc(512 * 2 * 2, 256)

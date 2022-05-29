@@ -40,13 +40,14 @@ def IoU_index(pred, target, smooth=1e-6):
 
 
 def IoU_loss(pred, target):
-    target /= 512
+    #target /= 512
+    pred = pred * 512
     #index = 1-IoU_index(pred, target).mean()
     #print(f"{pred[0]=}")
     #print(f"{target[0]=}")
     index = 1 - IoU_index(pred, target).mean()
     #print(f"{index=}")
     loss = nn.L1Loss()(pred, target)
-    #loss -= index
+    loss -= index
 
     return loss
