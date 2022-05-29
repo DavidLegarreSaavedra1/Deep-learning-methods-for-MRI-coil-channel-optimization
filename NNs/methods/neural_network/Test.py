@@ -1,4 +1,3 @@
-from methods import *
 from ..visualization import *
 import torchvision
 import cv2 as cv
