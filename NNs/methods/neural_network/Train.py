@@ -23,7 +23,7 @@ def train(
 ):
 
     Adam = False
-    learning_rate = 0.07
+    learning_rate = 0.01
     min_val_loss = 1_000_000
     n_epochs_stop = 7
     n_no_improve = 0

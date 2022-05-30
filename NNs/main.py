@@ -12,8 +12,9 @@ import cv2 as cv
 
 torch.cuda.empty_cache()
 
-N_EPOCHS = 1000
-BATCH_SIZE = 32
+
+N_EPOCHS = 11
+BATCH_SIZE = 4
 IMG_SIZE = 144
 TO_TRAIN = True
 
@@ -70,6 +71,7 @@ if __name__ == '__main__':
 
     # Draw bounding boxes of training example
     img, bbox, _ = next(iter(testing_data_loader))
+    print(img[0].shape)
     img = cv.normalize(
         img[0].numpy(), None, 
         0, 255, cv.NORM_MINMAX,
@@ -77,9 +79,14 @@ if __name__ == '__main__':
     )
     img = torch.from_numpy(img).to(device)
 
+
+    x1,y1,width,height = bbox[0]*IMG_SIZE
+    x2 = x1+width
+    y2 = y1+height
+    bbox[0] = torch.tensor([x1,y1,x2,y2]).squeeze(0)
     training_result = torchvision.utils.draw_bounding_boxes(
         img,
-        bbox[0].unsqueeze(0),
+        bbox,
         colors='green',
         width=2
     )
