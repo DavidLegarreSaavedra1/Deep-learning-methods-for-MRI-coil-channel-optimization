@@ -23,7 +23,7 @@ def train(
 ):
 
     Adam = False
-    learning_rate = 0.01
+    learning_rate = 0.1
     min_val_loss = 1_000_000
     n_epochs_stop = 7
     n_no_improve = 0
@@ -37,7 +37,7 @@ def train(
     else:
         optimizer = optim.SGD(
             model.parameters(), lr=learning_rate,
-            momentum=0.9
+            momentum=0.9, weight_decay=0.5
         )
 
     epochs = []

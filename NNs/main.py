@@ -13,7 +13,7 @@ import cv2 as cv
 torch.cuda.empty_cache()
 
 
-N_EPOCHS = 11
+N_EPOCHS = 25
 BATCH_SIZE = 4
 IMG_SIZE = 144
 TO_TRAIN = True
