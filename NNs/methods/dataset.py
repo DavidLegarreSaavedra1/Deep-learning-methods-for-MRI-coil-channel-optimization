@@ -38,6 +38,10 @@ class ChestHeartDataset(Dataset):
         img_path = img_path[:6] + img_path[8:]
         img_path = self.root + '/' + img_path
         img = cv.imread(img_path, 0)
+        img = cv.normalize(
+            img, None, 0, 255, cv.NORM_MINMAX
+        )
+        w,h = img.shape
         #img = Image.open(img_path)
         transform = T.Compose([
             T.ToTensor(),
@@ -57,9 +61,15 @@ class ChestHeartDataset(Dataset):
         box = [x0, y0, x1, y1]
 
         # Define target box
-        bboxes = torch.as_tensor(box, dtype=torch.float32)
+        #bboxes = torch.as_tensor(box, dtype=torch.float32)
 
-        #bboxes = torch.as_tensor(coords, dtype=torch.float32)
+        x0 = coords[0]/w
+        y0 = coords[1]/h
+        x1 = coords[2]/w
+        y1 = coords[3]/h
+        box = [x0, y0, x1, y1]
+
+        bboxes = torch.as_tensor(box, dtype=torch.float64)
         labels = annotation["category_id"]
         labels = torch.tensor(labels, dtype=torch.int64)
 

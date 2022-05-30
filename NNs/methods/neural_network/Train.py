@@ -1,3 +1,4 @@
+from logging import root
 from .Loss import *
 import time
 import torch
@@ -18,36 +19,52 @@ def loss_fn(pred, target):
 
 def train(
     model, n_epochs, dataloader,
-    valdataloader, device
+    valdataloader, device, root_data_path
 ):
-    optimizer = optim.SGD(
-        model.parameters(), lr=1e-5,
-        momentum=0.9
-    )
-    optimizer = optim.Adamax(
-        model.parameters(), lr=1e-2
-    )
+
+    Adam = False
+    learning_rate = 0.07
+    min_val_loss = 1_000_000
+    n_epochs_stop = 7
+    n_no_improve = 0
+    early_stop = False
+
+
+    if Adam:
+        optimizer = optim.Adam(
+            model.parameters(), lr=learning_rate
+        )
+    else:
+        optimizer = optim.SGD(
+            model.parameters(), lr=learning_rate,
+            momentum=0.9
+        )
+
     epochs = []
     losses = []
+    train_losses = []
 
     for epoch in range(n_epochs):
+
         tot_loss = 0
+        train_loss = 0
         train_start = time.time()
         model.train()
+
         for batch, (img, bbox, label) in enumerate(dataloader):
+
             img, bbox = img.to(device), bbox.to(device)
             label = label.to(device)
+            img = img.float()
+            bbox = bbox.float()
 
 
             class_pred, bbox_pred = model(img)
             bb_loss = loss_fn(bbox_pred, bbox)
-            bb_loss = bb_loss.sum()
-            class_loss = F.cross_entropy(class_pred, label, reduction='sum')
-
-            loss = class_loss + bb_loss
 
             optimizer.zero_grad()
-            loss.backward()
+            bb_loss.backward()
+            train_loss += bb_loss.item()
             optimizer.step()
             print("Train batch:", batch+1, " epoch: ", epoch, " ",
                     (time.time()-train_start)/60, end='\r')
@@ -56,23 +73,39 @@ def train(
         for batch, (img, bbox, label) in enumerate(valdataloader):
             img, bbox = img.to(device), bbox.to(device)
             label = label.to(device)
+            img = img.float()
+            bbox = bbox.float()
 
             optimizer.zero_grad()
             with torch.no_grad():
                 class_pred, bbox_pred = model(img)
 
                 class_loss = F.cross_entropy(class_pred, label, reduction='sum')
-                box_loss = loss_fn(bbox_pred, bbox).sum()
+                box_loss = loss_fn(bbox_pred, bbox)
 
                 loss = class_loss + box_loss
             
-            tot_loss += loss.item()
-            print("Test batch:", batch+1, " epoch: ", " ",
+            tot_loss += box_loss.item()
+            print("Val batch:", batch+1, " epoch: ", " ",
                     (time.time()-train_start)/60, end='\r')
             torch.cuda.empty_cache()
+            
         epochs.append(epoch)
         losses.append(tot_loss)
+        train_losses.append(train_loss)
         print("Epoch", epoch, "Loss: ", tot_loss, 
                 "time: ", (time.time()-train_start)/60, " mins")
 
-    return epochs, losses
+        if tot_loss < min_val_loss:
+            n_no_improve = 0
+            min_val_loss = tot_loss
+            torch.save(model.state_dict(), root_data_path / 'net.pth')
+        else:
+            n_no_improve += 1
+        
+        if epoch > 5 and n_no_improve == n_epochs_stop:
+            print("Early stopped")
+            early_stop = True
+            break
+
+    return epochs, losses, train_losses

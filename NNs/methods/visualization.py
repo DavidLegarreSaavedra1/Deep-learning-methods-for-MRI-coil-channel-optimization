@@ -66,8 +66,8 @@ def postprocess(img, bbox, device):
 
     x1 = int(w*x1)
     y1 = int(h*y1)
-    x2 = int(w*width)
-    y2 = int(h*height)
+    x2 = int(w*width+x1)
+    y2 = int(h*height+y1)
 
     new_bbox = [x1,y1,x2,y2]
     new_bbox = torch.tensor(

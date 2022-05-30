@@ -47,10 +47,10 @@ def main():
 
     prev_img = combine_images(img_np)
 
-    img_ = cv.normalize(prev_img, None, alpha=0,beta=200, norm_type=cv.NORM_MINMAX)
+    prev_img = cv.normalize(prev_img, None, alpha=0,beta=255, norm_type=cv.NORM_MINMAX)
 
 
-    cv.imwrite('prev_img.png', img_)
+    cv.imwrite('prev_img.png', prev_img)
 
     fig, axs = plt.subplots(1, 2)
     regions = [A_W, A_H, B1_W, B1_H, B2_W]

@@ -12,8 +12,8 @@ import cv2 as cv
 
 torch.cuda.empty_cache()
 
-N_EPOCHS = 25
-BATCH_SIZE = 12
+N_EPOCHS = 1000
+BATCH_SIZE = 32
 IMG_SIZE = 144
 TO_TRAIN = True
 
@@ -86,8 +86,7 @@ if __name__ == '__main__':
 
 
     if TO_TRAIN:
-        epochs, losses = train(net, N_EPOCHS, training_data_loader, validate_data_loader, device)
-        torch.save(net.state_dict(), root_data_path / 'net.pth')
+        epochs, losses, train_losses = train(net, N_EPOCHS, training_data_loader, validate_data_loader, device,root_data_path)
 
     net.load_state_dict(torch.load(root_data_path / 'net.pth'))
     net.eval()
@@ -99,8 +98,10 @@ if __name__ == '__main__':
     if TO_TRAIN:
         fig, ax = plt.subplots(1,1)
         ax.plot(epochs, losses)
+        ax.plot(epochs, train_losses)
         ax.set_xlabel("Epochs")
         ax.set_ylabel("Loss")
+        ax.legend(["Validation loss", "Training loss"])
 
     show(training_result)
 
