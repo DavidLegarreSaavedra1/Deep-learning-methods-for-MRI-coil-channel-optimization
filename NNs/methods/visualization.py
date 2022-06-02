@@ -24,14 +24,17 @@ def transform_bbox(bbox):
 
     return x1, y1, x1+width, y1+height
 
-def preprocess(img, device, img_size = 144):
+def preprocess(img, device = "cpu", img_size = 144):
     """Preprocess images to prepare for model    
 
     img_size: Size of the image to resize
     """
 
     image = cv.resize(img, (img_size, img_size))
-    image = image.astype(np.float) / 255.0
+    #image = image.astype(np.float) / 255.0
+    image = cv.normalize(
+        img, None, 0, 255, cv.NORM_MINMAX, cv.CV_32F
+    )
 
     # convert image to a tensor
     image = torch.from_numpy(
@@ -53,21 +56,22 @@ def postprocess(img, bbox, device):
     This function will adapt the output of the network
     to the original dimensions of the image
     """
-    w, h = 512, 512
 
-    print(img.shape)
     img = torch.from_numpy(img).unsqueeze(0)
-    img = T.Resize(size=w)(img)
+    #img = T.Resize(size=w)(img)
 
     img = img.type(torch.uint8)
 
 
+    print(img.shape)
+    w, h = img.shape[-2:]
+    print(w,h)
     x1, y1, width, height = bbox[0]
 
     x1 = int(w*x1)
     y1 = int(h*y1)
-    x2 = int(w*width+x1)
-    y2 = int(h*height+y1)
+    x2 = int(w*width)
+    y2 = int(h*height)
 
     new_bbox = [x1,y1,x2,y2]
     new_bbox = torch.tensor(

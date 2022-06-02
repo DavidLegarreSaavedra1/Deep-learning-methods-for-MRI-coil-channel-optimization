@@ -1,4 +1,4 @@
-import numpy as np
+import torch
 
 def convert_bbox(bbox, w, h):
     x1, y1, width, height = bbox
@@ -8,4 +8,4 @@ def convert_bbox(bbox, w, h):
     x2 = x1+width*w
     y2 = y1+height*h
 
-    return x1,y1,x2,y2
+    return torch.tensor([x1,y1,x2,y2])

@@ -39,42 +39,32 @@ class ChestHeartDataset(Dataset):
         img_path = self.root + '/' + img_path
         img = cv.imread(img_path, 0)
         img = cv.normalize(
-            img, None, 0, 255, cv.NORM_MINMAX
+            img, None, 0, 255, cv.NORM_MINMAX,
+            cv.CV_32F
         )
-        w,h = img.shape
+        w,h = img.shape[:2]
         #img = Image.open(img_path)
-        transform = T.Compose([
+        tensorizer = T.Compose([
             T.ToTensor(),
         ])
-        img = transform(img)
-        if self.transforms:
-            img = self.transforms(img)
+        img = tensorizer(img)
+        #img = img.type(torch.float)
 
         # Get annotations
         annotation = self.annotations[index]
         coords = annotation["bbox"]
 
-        x0 = coords[0]
-        y0 = coords[1]
-        x1 = x0+coords[2]
-        y1 = y0+coords[3]
+        x0 = coords[0]/w
+        y0 = coords[1]/h
+        x1 = x0+coords[2]/w
+        y1 = y0+coords[3]/h
         box = [x0, y0, x1, y1]
 
         # Define target box
-        #bboxes = torch.as_tensor(box, dtype=torch.float32)
-
-        x0 = coords[0]/w
-        y0 = coords[1]/h
-        x1 = coords[2]/w
-        y1 = coords[3]/h
-        box = [x0, y0, x1, y1]
-
-        bboxes = torch.as_tensor(box, dtype=torch.float64)
-        labels = annotation["category_id"]
-        labels = torch.tensor(labels, dtype=torch.int64)
+        bboxes = torch.as_tensor(box, dtype=torch.float)
 
         # return img, target
-        return img, bboxes, labels
+        return img, bboxes
 
     def __len__(self):
         return len(self.images)

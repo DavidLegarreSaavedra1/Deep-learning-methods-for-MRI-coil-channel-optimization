@@ -14,6 +14,8 @@ def testing(test_path, net, device, IMG_SIZE):
             processed_img
         )
 
+        print(bbox_out)
+
         img, bbox_out = postprocess(test, bbox_out, device)
 
         print(bbox_out)

@@ -14,17 +14,26 @@ model = load_model(WEIGHTS_PATH)
 img = cv.imread(IMG_PATH, 0)
 w,h = img.shape
 
-
+print(img.shape)
 cv.imshow("test",img)
-cv.waitKey(0) 
 
 img = T.ToTensor()(img)
-img = T.Resize(IMG_SIZE)(img).unsqueeze(0)
-bbox_A = model(img)[0]
-print(bbox_A)
-print(bbox_A.shape)
+img_ = T.Resize(IMG_SIZE)(img).unsqueeze(0)
+bbox_A = model(img_)[0]
 bbox_A = convert_bbox(bbox_A, w, h)
-print(bbox_A)
+
+img = img.type(torch.uint8)
+
+cv.imshow("test2", img.numpy()[0])
+training_result = torchvision.utils.draw_bounding_boxes(
+    img,
+    bbox_A.unsqueeze(0),
+    colors='green',
+    width=2
+)
+
+show(training_result)
+plt.show()
 
 #closing all open windows 
 cv.destroyAllWindows() 

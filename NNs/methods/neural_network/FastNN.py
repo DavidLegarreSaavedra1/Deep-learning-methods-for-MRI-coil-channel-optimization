@@ -5,7 +5,7 @@ import re
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torchvision
+import torchvision.transforms as T
 import time
 
 
@@ -15,8 +15,8 @@ class BasicConv2d(nn.Module):
         self.conv = nn.Conv2d(in_channels, out_channels, **kwargs)
         self.relu = nn.ReLU(inplace=True)
         self.norm = nn.BatchNorm2d(out_channels)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.drop = nn.Dropout2d(p=0.25)
+        self.pool = nn.AvgPool2d(2, 2)
+        self.drop = nn.Dropout(p=0.5)
 
     def forward(self, x):
         x = self.conv(x)
@@ -32,32 +32,38 @@ class BasicFc(nn.Module):
         super().__init__()
         self.fc = nn.Linear(in_channels, out_channels, **kwargs)
         self.relu = nn.ReLU(inplace=True)
+        self.drop = nn.Dropout(p=0.5)
 
     def forward(self, x):
         x = self.fc(x)
         x = self.relu(x)
+        x = self.drop(x)
         return x
 
 
 class FastNN(nn.Module):
-    # Input images of size IMAGE_SIZE
-    def __init__(self):
+    # Input images of size
+    def __init__(self, image_size):
         super(FastNN, self).__init__()
         # CNN phase
         self.conv1 = BasicConv2d(1, 32, kernel_size=3)
         self.conv2 = BasicConv2d(32, 64, kernel_size=3)
-        self.conv3 = BasicConv2d(64, 128, kernel_size=3)
-        self.conv4 = BasicConv2d(128, 256, kernel_size=3)
-        self.conv5 = BasicConv2d(256, 512, kernel_size=3)
+        self.conv3 = BasicConv2d(64, 128, kernel_size=3, padding=1)
+        self.conv4 = BasicConv2d(128, 256, kernel_size=3, padding=1)
+        self.conv5 = BasicConv2d(256, 512, kernel_size=3, padding=1)
 
         # To predict bounding boxes
-        self.boxc1 = BasicFc(512 * 2 * 2, 256)
+        #self.boxc1 = BasicFc(512 * 6 * 6, 256)
+        self.boxc1 = BasicFc(2048, 256)
         self.boxc2 = BasicFc(256, 128)
         self.boxc3 = BasicFc(128, 64)
         self.boxc4 = BasicFc(64, 32)
         self.box = nn.Linear(32, 4)
+        self.resize = T.Resize(image_size)
 
     def forward(self, x):
+        x = self.resize(x)
+
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
@@ -71,6 +77,6 @@ class FastNN(nn.Module):
         box_pred = self.boxc3(box_pred)
         box_pred = self.boxc4(box_pred)
         box_pred = self.box(box_pred)
-        box_pred = nn.Sigmoid()(box_pred)
+        #box_pred = nn.Sigmoid()(box_pred)
 
         return box_pred

@@ -13,10 +13,10 @@ import cv2 as cv
 torch.cuda.empty_cache()
 
 
-N_EPOCHS = 11
-BATCH_SIZE = 4
-IMG_SIZE = 144
-TO_TRAIN = False
+N_EPOCHS = 25
+BATCH_SIZE = 16
+IMG_SIZE = 96
+TO_TRAIN = True
 
 if torch.cuda.is_available():
     device = torch.device('cuda')
@@ -52,28 +52,27 @@ if __name__ == '__main__':
     training_data_loader = torch.utils.data.DataLoader(
         train_dataset,
         batch_size=BATCH_SIZE,
-        num_workers=4,
         shuffle=True,
+        pin_memory=True,
     )
     testing_data_loader = torch.utils.data.DataLoader(
         test_dataset,
         batch_size=BATCH_SIZE,
-        num_workers=4,
         shuffle=True,
+        pin_memory=True,
     )
     validate_data_loader = torch.utils.data.DataLoader(
         val_dataset,
         batch_size=BATCH_SIZE,
-        num_workers=4,
-        shuffle=True,
+        shuffle=False,
+        pin_memory=True,
     )
     
-    net = FastNN()
+    net = FastNN(IMG_SIZE)
     net = net.to(device)
 
     # Draw bounding boxes of training example
-    img, bbox, _ = next(iter(testing_data_loader))
-    print(img[0].shape)
+    img, bbox = next(iter(testing_data_loader))
     img = cv.normalize(
         img[0].numpy(), None, 
         0, 255, cv.NORM_MINMAX,
@@ -81,21 +80,11 @@ if __name__ == '__main__':
     )
     img = torch.from_numpy(img).to(device)
 
-
-    x1,y1,width,height = bbox[0]*IMG_SIZE
-    x2 = x1+width
-    y2 = y1+height
-    bbox[0] = torch.tensor([x1,y1,x2,y2]).squeeze(0)
-    training_result = torchvision.utils.draw_bounding_boxes(
-        img,
-        bbox,
-        colors='green',
-        width=2
-    )
-
-
+    print(net(img.float().unsqueeze(0)))
     if TO_TRAIN:
-        epochs, losses, train_losses = train(net, N_EPOCHS, training_data_loader, validate_data_loader, device,root_data_path)
+        epochs, losses, train_losses = train(net, N_EPOCHS,
+                training_data_loader, validate_data_loader, 
+                device,root_data_path, IMG_SIZE)
 
     net.load_state_dict(torch.load(root_data_path / 'net.pth'))
     net.eval()
@@ -112,6 +101,5 @@ if __name__ == '__main__':
         ax.set_ylabel("Loss")
         ax.legend(["Validation loss", "Training loss"])
 
-    show(training_result)
 
     plt.show()
