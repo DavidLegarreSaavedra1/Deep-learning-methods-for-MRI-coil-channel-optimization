@@ -1,3 +1,4 @@
+from ctypes import WinDLL
 from logging import root
 from .Loss import *
 import time
@@ -12,9 +13,9 @@ import time
 
 def loss_fn(pred, target):
     #target /= 144
-    #loss = nn.CrossEntropyLoss()(pred, target)
+    loss = nn.SmoothL1Loss()(pred, target)
     #loss = nn.MultiLabelSoftMarginLoss()(pred, target).sum()
-    loss = IoU_loss(pred,target)
+    #loss = IoU_loss(pred,target)
     return loss
 
 def train(
@@ -22,10 +23,11 @@ def train(
     valdataloader, device, root_data_path
 ):
 
-    Adam = False
-    learning_rate = 0.1
+    Adam = True
+    learning_rate = 0.01
     min_val_loss = 1_000_000
     n_epochs_stop = 7
+    wd = 0
     n_no_improve = 0
     early_stop = False
 
@@ -37,7 +39,7 @@ def train(
     else:
         optimizer = optim.SGD(
             model.parameters(), lr=learning_rate,
-            momentum=0.9, weight_decay=0.5
+            momentum=0.9, weight_decay=wd 
         )
 
     epochs = []
@@ -59,7 +61,7 @@ def train(
             bbox = bbox.float()
 
 
-            class_pred, bbox_pred = model(img)
+            bbox_pred = model(img)
             bb_loss = loss_fn(bbox_pred, bbox)
 
             optimizer.zero_grad()
@@ -78,13 +80,10 @@ def train(
 
             optimizer.zero_grad()
             with torch.no_grad():
-                class_pred, bbox_pred = model(img)
+                bbox_pred = model(img)
 
-                class_loss = F.cross_entropy(class_pred, label, reduction='sum')
                 box_loss = loss_fn(bbox_pred, bbox)
 
-                loss = class_loss + box_loss
-            
             tot_loss += box_loss.item()
             print("Val batch:", batch+1, " epoch: ", " ",
                     (time.time()-train_start)/60, end='\r')

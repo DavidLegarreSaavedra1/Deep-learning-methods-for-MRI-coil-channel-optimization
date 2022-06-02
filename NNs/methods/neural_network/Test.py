@@ -10,7 +10,7 @@ def testing(test_path, net, device, IMG_SIZE):
 
         processed_img = preprocess(test, device, img_size=IMG_SIZE)
 
-        _,bbox_out = net(
+        bbox_out = net(
             processed_img
         )
 

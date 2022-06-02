@@ -13,10 +13,10 @@ import cv2 as cv
 torch.cuda.empty_cache()
 
 
-N_EPOCHS = 25
+N_EPOCHS = 11
 BATCH_SIZE = 4
 IMG_SIZE = 144
-TO_TRAIN = True
+TO_TRAIN = False
 
 if torch.cuda.is_available():
     device = torch.device('cuda')
@@ -40,7 +40,6 @@ if __name__ == '__main__':
         transforms=train_transformers
     )
 
-    print(len(heart_dataset))
 
     train_len = int(0.8 * len(heart_dataset))
     test_len = int((len(heart_dataset)-train_len)/2)
@@ -53,20 +52,23 @@ if __name__ == '__main__':
     training_data_loader = torch.utils.data.DataLoader(
         train_dataset,
         batch_size=BATCH_SIZE,
+        num_workers=4,
         shuffle=True,
     )
     testing_data_loader = torch.utils.data.DataLoader(
         test_dataset,
         batch_size=BATCH_SIZE,
+        num_workers=4,
         shuffle=True,
     )
     validate_data_loader = torch.utils.data.DataLoader(
         val_dataset,
         batch_size=BATCH_SIZE,
+        num_workers=4,
         shuffle=True,
     )
     
-    net = FastNN(heart_dataset.num_classes())
+    net = FastNN()
     net = net.to(device)
 
     # Draw bounding boxes of training example

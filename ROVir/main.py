@@ -47,7 +47,9 @@ def main():
 
     prev_img = combine_images(img_np)
 
+    print(prev_img.shape)
     prev_img = cv.normalize(prev_img, None, alpha=0,beta=255, norm_type=cv.NORM_MINMAX)
+    print(prev_img.shape)
 
 
     cv.imwrite('prev_img.png', prev_img)
