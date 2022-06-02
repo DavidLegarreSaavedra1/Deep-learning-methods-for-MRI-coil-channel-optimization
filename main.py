@@ -7,19 +7,21 @@ import torchvision.transforms as T
 
 WEIGHTS_PATH = (path.cwd() / "model" / "FastNN.pth").as_posix()
 IMG_PATH = (path.cwd() / "data" / "test.png").as_posix()
-IMG_SIZE = 144
+IMG_SIZE = 96
 
-model = load_model(WEIGHTS_PATH)
+model = load_model(WEIGHTS_PATH, IMG_SIZE)
 
 img = cv.imread(IMG_PATH, 0)
-w,h = img.shape
+img = cv.normalize(
+    img, None, 0, 255,
+    cv.NORM_MINMAX, cv.CV_32F
+)
 
-print(img.shape)
-cv.imshow("test",img)
+w,h = img.shape
 
 img = T.ToTensor()(img)
 img_ = T.Resize(IMG_SIZE)(img).unsqueeze(0)
-bbox_A = model(img_)[0]
+bbox_A = model(img_)
 bbox_A = convert_bbox(bbox_A, w, h)
 
 img = img.type(torch.uint8)

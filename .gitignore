@@ -142,3 +142,4 @@ results/
 /**/*.png
 **.png
 ROVIR_im.py
+NNs/runs/**
