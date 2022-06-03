@@ -14,7 +14,7 @@ torch.cuda.empty_cache()
 
 
 N_EPOCHS = 25
-BATCH_SIZE = 16
+BATCH_SIZE = 32
 IMG_SIZE = 96
 TO_TRAIN = True
 
@@ -68,7 +68,8 @@ if __name__ == '__main__':
         pin_memory=True,
     )
     
-    net = FastNN(IMG_SIZE)
+    #net = FastNN(IMG_SIZE)
+    net = TestNN(IMG_SIZE)
     net = net.to(device)
 
     # Draw bounding boxes of training example
@@ -80,7 +81,6 @@ if __name__ == '__main__':
     )
     img = torch.from_numpy(img).to(device)
 
-    print(net(img.float().unsqueeze(0)))
     if TO_TRAIN:
         epochs, losses, train_losses = train(net, N_EPOCHS,
                 training_data_loader, validate_data_loader, 
