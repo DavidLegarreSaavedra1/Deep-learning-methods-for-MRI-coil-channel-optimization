@@ -68,8 +68,7 @@ if __name__ == '__main__':
         pin_memory=True,
     )
     
-    #net = FastNN(IMG_SIZE)
-    net = TestNN(IMG_SIZE)
+    net = FastNN(IMG_SIZE)
     net = net.to(device)
 
     # Draw bounding boxes of training example

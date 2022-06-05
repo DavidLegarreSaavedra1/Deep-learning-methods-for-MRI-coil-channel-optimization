@@ -2,6 +2,7 @@ import torch
 
 def convert_bbox(bbox, w, h):
     x1, y1, width, height = bbox[0]
+    print(height)
 
     x1 = x1*w
     y1 = y1*h
