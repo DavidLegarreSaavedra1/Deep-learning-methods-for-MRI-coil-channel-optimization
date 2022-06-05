@@ -11,14 +11,16 @@ import h5py
 import cv2 as cv
 import scipy.misc
 import matplotlib.image as mpimg
+import matplotlib
+matplotlib.use('tkagg')
 
 dirs = [os.getcwd(), "data"]
 data_path = os.path.join(*dirs)
 
-A_W = slice(100, 350)
-B1_W = slice(0, 90)
+A_W = slice(200, 400)
+B1_W = slice(0, 150)
 B2_W = slice(430, -1)
-A_H = slice(120, 290)
+A_H = slice(120, 300)
 B1_H = slice(80, 450)
 
 LINE = 300
@@ -30,6 +32,21 @@ regions = [A_W, A_H, B1_W, B1_H, B2_W]
 H_W = slice(120, 310)
 H_H = slice(230, 400)
 
+def window_image(image, window_center, window_width):
+
+    img_min = window_center - window_width // 2
+
+    img_max = window_center + window_width // 2
+
+    window_image = image.copy()
+
+    window_image[window_image < img_min] = img_min
+
+    window_image[window_image > img_max] = img_max
+
+
+
+    return window_image
 
 def main():
 
@@ -40,10 +57,14 @@ def main():
     width = img.shape[1]
     num_coils = img.shape[2]
     # lowf = int(input("lowf = "))
-    lowf = 12
+    lowf = 10
 
-    img_np = np.array(img.dataobj)
-    img_np = np.flipud(img_np).copy()
+    img_np = np.array(img.dataobj) 
+    img_np = np.flip(img_np, [0,1])
+
+    for i in range(np.min(img_np.shape)):
+        img_np[...,i] = window_image(img_np[...,i], 100, 1500)
+
 
     prev_img = combine_images(img_np)
 
@@ -95,7 +116,7 @@ def main():
     
     plot_intensities(
         prev_img, new_img, 
-        242, save=True
+        235, save=True
     )
     plt.tight_layout()
     plt.show()
