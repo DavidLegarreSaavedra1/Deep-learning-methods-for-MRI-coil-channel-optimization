@@ -28,7 +28,7 @@ class FastNN(nn.Module):
         )
         self.box_regressor = nn.Sequential(
                 nn.Flatten(),
-                nn.Linear(10*48*48, 4)
+                nn.Linear(10*24*24, 4)
         )
         self.resize = T.Resize(image_size)
 

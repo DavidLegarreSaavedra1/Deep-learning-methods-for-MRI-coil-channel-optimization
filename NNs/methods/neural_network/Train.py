@@ -57,6 +57,7 @@ def train(
     epochs = []
     val_losses = []
     train_losses = []
+    best_vloss = 1_000_000
 
     optimizer = torch.optim.SGD(
             model.parameters(), lr=1e-2
@@ -82,6 +83,10 @@ def train(
         train_loss /= len(train_dataloader)
         val_loss /= len(valdataloader)
         print(f"\nTrain loss: {train_loss:.5f} | Validation loss: {val_loss:.5f}")
+
+        if val_loss < best_vloss:
+            best_vloss = val_loss
+            torch.save(model.state_dict(), root_data_path / 'net.pth')
 
         epochs.append(epoch)
         #val_losses.append(val_loss.cpu().detach().numpy())
