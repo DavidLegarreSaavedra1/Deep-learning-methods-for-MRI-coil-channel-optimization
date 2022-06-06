@@ -17,7 +17,7 @@ class FastNN(nn.Module):
             nn.ReLU(),
             nn.Conv2d(10, 10, 3, stride=1, padding=1),
             nn.ReLU(),
-            nn.Conv2d(10, 10, 3, stride=1, padding=1)
+            nn.MaxPool2d(2)
         )
         self.block2 = nn.Sequential(
             nn.Conv2d(10, 10, 3, padding=1),
