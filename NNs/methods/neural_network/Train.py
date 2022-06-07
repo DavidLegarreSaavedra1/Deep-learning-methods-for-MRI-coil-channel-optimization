@@ -58,14 +58,23 @@ def train(
     epochs = []
     val_losses = []
     train_losses = []
+    loss_saved = []
+    best_epoch = []
     best_vloss = 1_000_000
-    patience = 10
+    patience = 7
     trigger = 0 
 
+    adam = True
+
     optimizer = torch.optim.SGD(
-            model.parameters(), lr=1e-2,
-            momentum=0.9, weight_decay=0.5
+            model.parameters(), lr=1e-4,
+            momentum=0.8, weight_decay=1e-5
     )
+
+    if adam:
+        optimizer = torch.optim.Adam(
+            model.parameters(), lr=1e-4
+        )
 
     for epoch in tqdm(range(n_epochs)):
         print(f"\nEpoch: {epoch}\n----",end="\r")
@@ -91,6 +100,8 @@ def train(
         if val_loss < best_vloss:
             best_vloss = val_loss
             trigger = 0
+            loss_saved.append(best_vloss)
+            best_epoch.append(epoch)
             torch.save(model.state_dict(), root_data_path / 'net.pth')
         else:
             trigger += 1
@@ -108,5 +119,6 @@ def train(
 
     print(f"Train time on {device}: {train_finish-train_start:.3f} seconds")
 
-    return epochs[1:], val_losses[1:], train_losses[1:]
+    #return epochs[1:], val_losses[1:], train_losses[1:]
+    return epochs, val_losses, train_losses, loss_saved, best_epoch
 

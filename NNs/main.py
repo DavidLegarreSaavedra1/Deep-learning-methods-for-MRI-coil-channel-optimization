@@ -26,7 +26,7 @@ else:
 
 if __name__ == '__main__':
     # Dataset loader
-    root_data_path = path.cwd() / 'data' / 'heart_augmented' 
+    root_data_path = path.cwd() / 'data' 
 
     training_ann = root_data_path / 'result.json'
 
@@ -41,12 +41,12 @@ if __name__ == '__main__':
     )
 
 
-    train_len = int(0.8 * len(heart_dataset))
+    train_len = int(0.9 * len(heart_dataset))
     test_len = int((len(heart_dataset)-train_len)/2)
     val_len = int(len(heart_dataset)-train_len-test_len)
 
-    train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(
-        heart_dataset, [train_len, val_len, test_len]
+    train_dataset, val_dataset= torch.utils.data.random_split(
+        heart_dataset, [train_len, val_len*2]
     )
 
     training_data_loader = torch.utils.data.DataLoader(
@@ -55,12 +55,12 @@ if __name__ == '__main__':
         shuffle=True,
         pin_memory=True,
     )
-    testing_data_loader = torch.utils.data.DataLoader(
-        test_dataset,
-        batch_size=BATCH_SIZE,
-        shuffle=True,
-        pin_memory=True,
-    )
+    #testing_data_loader = torch.utils.data.DataLoader(
+    #    test_dataset,
+    #    batch_size=BATCH_SIZE,
+    #    shuffle=True,
+    #    pin_memory=True,
+    #)
     validate_data_loader = torch.utils.data.DataLoader(
         val_dataset,
         batch_size=BATCH_SIZE,
@@ -71,19 +71,11 @@ if __name__ == '__main__':
     net = FastNN(IMG_SIZE)
     net = net.to(device)
 
-    # Draw bounding boxes of training example
-    img, bbox = next(iter(testing_data_loader))
-    img = cv.normalize(
-        img[0].numpy(), None, 
-        0, 255, cv.NORM_MINMAX,
-        cv.CV_8U
-    )
-    img = torch.from_numpy(img).to(device)
-
     if TO_TRAIN:
-        epochs, losses, train_losses = train(net, N_EPOCHS,
+        epochs, losses, train_losses, saved_loss, best_epoch = train(net, N_EPOCHS,
                 training_data_loader, validate_data_loader, 
-                device,root_data_path, IMG_SIZE)
+                device,root_data_path, IMG_SIZE
+        )
 
     net.load_state_dict(torch.load(root_data_path / 'net.pth'))
     net.eval()
@@ -96,9 +88,10 @@ if __name__ == '__main__':
         fig, ax = plt.subplots(1,1)
         ax.plot(epochs, losses)
         ax.plot(epochs, train_losses)
+        ax.scatter(best_epoch, saved_loss, c='g')
         ax.set_xlabel("Epochs")
         ax.set_ylabel("Loss")
-        ax.legend(["Validation loss", "Training loss"])
+        ax.legend(["Validation loss", "Training loss", "Model saved epochs"])
 
 
     plt.show()
