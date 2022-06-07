@@ -67,7 +67,7 @@ def train(
     adam = False
 
     optimizer = torch.optim.SGD(
-            model.parameters(), lr=5e-2,
+            model.parameters(), lr=1e-2,
             weight_decay=1e-2
     )
 
@@ -83,6 +83,7 @@ def train(
 
         for batch, (image, bbox) in enumerate(train_dataloader):
             image,bbox = image.to(device), bbox.to(device)
+            image = image.float()
             train_loss += train_step(
                     model, loss_fn, optimizer,
                     image, bbox

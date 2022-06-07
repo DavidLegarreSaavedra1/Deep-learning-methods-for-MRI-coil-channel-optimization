@@ -38,16 +38,16 @@ class ChestHeartDataset(Dataset):
         img_path = img_path[:6] + img_path[8:]
         img_path = self.root + '/' + img_path
         img = cv.imread(img_path, 0)
-        img = cv.normalize(
-            img, None, 0, 255, cv.NORM_MINMAX,
-            cv.CV_32F
-        )
         w,h = img.shape[:2]
         #img = Image.open(img_path)
         tensorizer = T.Compose([
             T.ToTensor(),
         ])
         img = tensorizer(img)
+        img = img.float()
+        hist, bins = torch.histogram(img,bins=64)
+        limit = torch.quantile(bins, 0.8)
+        img = img/limit
         #img = img.type(torch.float)
 
         # Get annotations
