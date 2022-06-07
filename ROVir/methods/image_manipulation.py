@@ -1,4 +1,5 @@
 from configparser import Interpolation
+from .matrix_manipulation import *
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image as image
@@ -9,19 +10,25 @@ def combine_images(channels):
 
     reconstructed_image = np.zeros(channels.shape[:1])
     for i in range(channels.shape[2]):
-        reconstructed_image = np.sqrt(np.square(channels[:, :, i])
-                                      + np.square(reconstructed_image))
+        reconstructed_image = (np.square(channels[:, :, i])
+                               + (reconstructed_image))
 
-    return reconstructed_image
+    return np.sqrt(reconstructed_image)
 
-def auto_contrast(image, q=99):
-    nval = len(image[image<100])
+
+def auto_contrast(image, q=99, dim=None):
     flat = image.flatten()
     sort_flat = np.sort(flat)
+    #lower_lim = np.quantile(sort_flat, 0.01)
+    nval = len(image[image < 50])
     limit = np.quantile(sort_flat[nval:], q)
-    flat[flat>limit]=limit
-    flat[flat>100]=100
-    return flat.reshape(image.shape[:2])
+    print(limit)
+    flat[flat > limit] = limit
+    #flat[flat > lower_lim] = lower_lim
+    if dim:
+        return flat.reshape(*image.shape[:2], dim)
+    return flat.reshape(*image.shape[:2])
+
 
 def intensity_plot(image, height, Title):
     fig, axs = plt.subplots(1, 2)
@@ -49,15 +56,15 @@ def intensity_plot(image, height, Title):
 
 def plot_masks(image, maskA, maskB,
                title='', save=False):
-               
-    fig, axs = plt.subplots(1,1)
+
+    fig, axs = plt.subplots(1, 1)
 
     maska = np.empty((*maskA.shape, 3))
     maska[maskA > 0] = (0.0, 1.0, 0.0)
-    
+
     maskb = np.empty((*maskB.shape, 3))
     maskb[maskB > 0] = (1.0, 0.0, 0.0)
-    
+
     im = axs.imshow(image, cmap='gray')
     im.set_clim(0, np.max(image)/2)
 
@@ -79,13 +86,11 @@ def plot_images(img1, title1, nmax1, img2,
     im1 = axs[0].imshow(img1,
                         cmap='gray')
     axs[0].set_title(title1)
-    im1.set_clim(0, nmax1)
 
     im2 = axs[1].imshow(img2,
                         cmap='gray')
     axs[1].set_title(title2)
-    im2.set_clim(0, nmax2)
-    
+
     if save:
         plt.savefig("comparing_imgs.png", transparent=True)
 
@@ -111,6 +116,7 @@ def plot_coils(coils, title=''):
         hspace=0.4
     )
 
+
 def plot_intensities(img1, img2, height, save=False):
     #fig, axs = plt.subplots(1,2)
 
@@ -124,7 +130,7 @@ def plot_intensities(img1, img2, height, save=False):
         color='red'
     )
     ax0.set_title('Before ROVir')
-    
+
     ax1 = plt.subplot(222)
     ax1.imshow(
         img2, cmap='gray'
@@ -137,24 +143,26 @@ def plot_intensities(img1, img2, height, save=False):
     ax1.set_title('After ROVir')
 
     ax2 = plt.subplot(212)
+    tmp = moving_average(img1[height, :], 6)
     line1, = ax2.plot(
-        np.linspace(0, img1.shape[0]-1, img1.shape[0]),
-        img1[height, :],
+        np.linspace(0, img1.shape[0]-1, img1.shape[0]-5),
+        tmp,
         color='red'
     )
-    
+
+    tmp = moving_average(img2[height, :], 6)
     line2, = ax2.plot(
-        np.linspace(0, img2.shape[0]-1, img2.shape[0]),
-        img2[height, :],
+        np.linspace(0, img2.shape[0]-1, img2.shape[0]-5),
+        tmp,
         color='green'
     )
-    
+
     ax2.set_xlabel("Position")
     ax2.set_ylabel("Intensity")
     ax2.legend([line1, line2], ["Before ROVir", "Afer ROVir"])
     if save:
         plt.savefig("intensities.png", transparent=True)
-    
+
 
 def plot_image(img1, title='', save=False):
     fig = plt.figure()

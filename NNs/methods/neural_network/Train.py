@@ -64,16 +64,16 @@ def train(
     patience = 7
     trigger = 0 
 
-    adam = True
+    adam = False
 
     optimizer = torch.optim.SGD(
-            model.parameters(), lr=1e-4,
-            momentum=0.8, weight_decay=1e-5
+            model.parameters(), lr=5e-2,
+            weight_decay=1e-2
     )
 
     if adam:
         optimizer = torch.optim.Adam(
-            model.parameters(), lr=1e-4
+            model.parameters(), lr=1e-2
         )
 
     for epoch in tqdm(range(n_epochs)):

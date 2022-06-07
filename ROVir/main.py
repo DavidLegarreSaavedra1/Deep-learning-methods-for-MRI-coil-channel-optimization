@@ -1,3 +1,4 @@
+from enum import auto
 from pyparsing import line
 from methods import *
 from icecream import ic
@@ -17,10 +18,10 @@ matplotlib.use('tkagg')
 dirs = [os.getcwd(), "data"]
 data_path = os.path.join(*dirs)
 
-A_W = slice(200, 400)
+A_W = slice(200, 390)
 B1_W = slice(0, 150)
 B2_W = slice(430, -1)
-A_H = slice(120, 300)
+A_H = slice(120, 280)
 B1_H = slice(80, 450)
 
 LINE = 300
@@ -46,12 +47,14 @@ def main():
 
     img_np = np.array(img.dataobj) 
     img_np = np.flip(img_np, [0,1])
+    img_np = auto_contrast(img_np, 0.99, 25)
 
 
     prev_img = combine_images(img_np)
+    prev_img = auto_contrast(prev_img, 0.99)
 
     print(prev_img.shape)
-    prev_img = cv.normalize(prev_img, None, alpha=0,beta=255, norm_type=cv.NORM_MINMAX)
+    prev_img_ = cv.normalize(prev_img, None, alpha=0,beta=255, norm_type=cv.NORM_MINMAX)
     print(prev_img.shape)
 
 
@@ -95,6 +98,9 @@ def main():
         "Bottom coils",
         int(nmax1)*2.5
     )
+
+    print(prev_img.shape)
+    print(new_img.shape)
     
     plot_intensities(
         prev_img, new_img, 
