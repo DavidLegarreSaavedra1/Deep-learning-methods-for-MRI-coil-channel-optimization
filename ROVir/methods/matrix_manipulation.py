@@ -1,3 +1,4 @@
+from cv2 import sort
 import numpy as np
 from numpy import linalg as LA
 from scipy.ndimage import gaussian_filter
@@ -31,6 +32,8 @@ def vec_to_matrix(vec, rows, cols):
     )
 
     return matrix
+
+    
 
 
 def generate_matrix(coils):

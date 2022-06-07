@@ -32,21 +32,6 @@ regions = [A_W, A_H, B1_W, B1_H, B2_W]
 H_W = slice(120, 310)
 H_H = slice(230, 400)
 
-def window_image(image, window_center, window_width):
-
-    img_min = window_center - window_width // 2
-
-    img_max = window_center + window_width // 2
-
-    window_image = image.copy()
-
-    window_image[window_image < img_min] = img_min
-
-    window_image[window_image > img_max] = img_max
-
-
-
-    return window_image
 
 def main():
 
@@ -61,9 +46,6 @@ def main():
 
     img_np = np.array(img.dataobj) 
     img_np = np.flip(img_np, [0,1])
-
-    for i in range(np.min(img_np.shape)):
-        img_np[...,i] = window_image(img_np[...,i], 100, 1500)
 
 
     prev_img = combine_images(img_np)

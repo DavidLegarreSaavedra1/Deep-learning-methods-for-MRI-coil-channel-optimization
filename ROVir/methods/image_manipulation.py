@@ -14,6 +14,13 @@ def combine_images(channels):
 
     return reconstructed_image
 
+def auto_contrast(image, q=99):
+    nval = image[image<100]
+    flat = image.flatten()
+    sort_flat = np.sort(flat)
+    limit = np.quantile(sort_flat[nval:], q)
+    flat = flat[flat>limit]=limit
+    return flat.reshape(image.shape[:2])
 
 def intensity_plot(image, height, Title):
     fig, axs = plt.subplots(1, 2)

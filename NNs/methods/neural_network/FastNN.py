@@ -17,18 +17,23 @@ class FastNN(nn.Module):
             nn.ReLU(),
             nn.Conv2d(10, 10, 3, stride=1, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(2)
+            nn.MaxPool2d(2),
+            nn.Dropout(0.5)
         )
         self.block2 = nn.Sequential(
             nn.Conv2d(10, 10, 3, padding=1),
             nn.ReLU(),
             nn.Conv2d(10, 10, 3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(2)
+            nn.Conv2d(10, 10, 3, padding=1),
+            nn.MaxPool2d(2),
+            nn.Dropout(0.5)
         )
         self.box_regressor = nn.Sequential(
                 nn.Flatten(),
-                nn.Linear(10*24*24, 4)
+                nn.Linear(10*24*24, 1024),
+                nn.ReLU(),
+                nn.Linear(1024, 4),
         )
         self.resize = T.Resize(image_size)
 

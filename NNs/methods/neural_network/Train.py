@@ -19,8 +19,9 @@ def loss_fn(pred, target):
     #target /= 144
     # print(f"{pred=}")
     # print(f"{target=}")
-    loss = nn.SmoothL1Loss()(pred, target)
-    #loss = nn.L1Loss()(pred, target)
+    #loss = nn.SmoothL1Loss()(pred, target)
+    loss = nn.L1Loss()(pred, target)
+    #loss = nn.MSELoss()(pred, target)
     return loss
 
 def train_step(
@@ -58,9 +59,12 @@ def train(
     val_losses = []
     train_losses = []
     best_vloss = 1_000_000
+    patience = 10
+    trigger = 0 
 
     optimizer = torch.optim.SGD(
-            model.parameters(), lr=1e-2
+            model.parameters(), lr=1e-2,
+            momentum=0.9, weight_decay=0.5
     )
 
     for epoch in tqdm(range(n_epochs)):
@@ -86,7 +90,13 @@ def train(
 
         if val_loss < best_vloss:
             best_vloss = val_loss
+            trigger = 0
             torch.save(model.state_dict(), root_data_path / 'net.pth')
+        else:
+            trigger += 1
+            if trigger >= patience:
+                print("Early stopping")
+                break
 
         epochs.append(epoch)
         #val_losses.append(val_loss.cpu().detach().numpy())
