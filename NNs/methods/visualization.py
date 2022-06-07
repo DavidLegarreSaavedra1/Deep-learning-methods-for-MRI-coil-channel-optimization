@@ -32,16 +32,15 @@ def preprocess(img, device = "cpu", img_size = 144):
 
     image = cv.resize(img, (img_size, img_size))
     #image = image.astype(np.float) / 255.0
-    image = cv.normalize(
-        img, None, 0, 255, cv.NORM_MINMAX, cv.CV_32F
-    )
 
     # convert image to a tensor
     image = torch.from_numpy(
         image
     ).to(device).float()
-
-    print(image.shape)
+    image = image.float()
+    hist, bins = torch.histogram(image.cpu(),bins=64)
+    limit = torch.quantile(bins, 0.8)
+    image = image/limit
 
     # Unsqueeze tensor to add batch dimension
     image = image.unsqueeze(0)

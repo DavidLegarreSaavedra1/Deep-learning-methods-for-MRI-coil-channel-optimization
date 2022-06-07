@@ -67,8 +67,8 @@ def train(
     adam = False
 
     optimizer = torch.optim.SGD(
-            model.parameters(), lr=1e-2,
-            weight_decay=1e-2
+            model.parameters(), lr=1e-3,
+            weight_decay=1e-1
     )
 
     if adam:
