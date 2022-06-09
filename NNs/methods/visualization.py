@@ -39,13 +39,18 @@ def preprocess(img, device = "cpu", img_size = 144):
     ).to(device).float()
     image = image.float()
     hist, bins = torch.histogram(image.cpu(),bins=64)
-    limit = torch.quantile(bins, 0.8)
+    limit = torch.quantile(bins, 0.99)
     image = image/limit
 
     # Unsqueeze tensor to add batch dimension
     image = image.unsqueeze(0)
     image = image.unsqueeze(0)
 
+    # Normalize the batch
+    image = T.Normalize(
+        mean=image.mean(),
+        std=image.std()
+    )(image)
 
     return image
 

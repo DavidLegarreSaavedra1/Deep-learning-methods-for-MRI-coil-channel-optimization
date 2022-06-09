@@ -13,11 +13,19 @@ import cv2 as cv
 import scipy.misc
 import matplotlib.image as mpimg
 import matplotlib
-matplotlib.use('tkagg')
 
+# Matplotlib configuration
+matplotlib.use('tkagg')
+plt.style.use('ggplot')
+plt.rcParams['image.cmap'] = "bwr"
+plt.rcParams['figure.dpi'] = "100"
+plt.rcParams["savefig.bbox"] = "tight"
+
+# Paths
 dirs = [os.getcwd(), "data"]
 data_path = os.path.join(*dirs)
 
+# Constants
 A_W = slice(200, 390)
 B1_W = slice(0, 150)
 B2_W = slice(430, -1)

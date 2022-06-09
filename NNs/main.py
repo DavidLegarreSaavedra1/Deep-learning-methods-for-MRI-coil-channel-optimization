@@ -2,6 +2,7 @@ from py import process
 from methods.neural_network.FastNN import *
 from pathlib import Path as path
 from methods import *
+from matplotlib import style
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -10,11 +11,15 @@ import torch.nn.functional as F
 import torchvision.transforms as T
 import cv2 as cv
 
+style.use('ggplot')
+plt.rcParams['image.cmap'] = "bwr"
+plt.rcParams['figure.dpi'] = "100"
+plt.rcParams["savefig.bbox"] = "tight"
 torch.cuda.empty_cache()
 
 
 N_EPOCHS = 100
-BATCH_SIZE = 32
+BATCH_SIZE = 16
 IMG_SIZE = 96
 TO_TRAIN = True
 
@@ -41,7 +46,7 @@ if __name__ == '__main__':
     )
 
 
-    train_len = int(0.9 * len(heart_dataset))
+    train_len = int(0.7 * len(heart_dataset))
     test_len = int((len(heart_dataset)-train_len)/2)
     val_len = int(len(heart_dataset)-train_len-test_len)
 
@@ -69,6 +74,7 @@ if __name__ == '__main__':
     )
     
     net = FastNN(IMG_SIZE)
+    #net = TestNN(IMG_SIZE)
     net = net.to(device)
 
     if TO_TRAIN:

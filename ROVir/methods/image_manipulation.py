@@ -16,15 +16,14 @@ def combine_images(channels):
     return np.sqrt(reconstructed_image)
 
 
-def auto_contrast(image, q=99, dim=None):
+def auto_contrast(image, q=.99, dim=None):
     flat = image.flatten()
     sort_flat = np.sort(flat)
-    #lower_lim = np.quantile(sort_flat, 0.01)
     nval = len(image[image < 50])
     limit = np.quantile(sort_flat[nval:], q)
     print(limit)
     flat[flat > limit] = limit
-    #flat[flat > lower_lim] = lower_lim
+    flat[flat < 100] = 0
     if dim:
         return flat.reshape(*image.shape[:2], dim)
     return flat.reshape(*image.shape[:2])

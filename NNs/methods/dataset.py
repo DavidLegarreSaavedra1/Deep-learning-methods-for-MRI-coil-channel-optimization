@@ -46,8 +46,12 @@ class ChestHeartDataset(Dataset):
         img = tensorizer(img)
         img = img.float()
         hist, bins = torch.histogram(img,bins=64)
-        limit = torch.quantile(bins, 0.8)
+        limit = torch.quantile(bins, 0.99)
         img = img/limit
+        img = T.Normalize(
+            mean=img.mean(),
+            std=img.std()
+        )(img)
         #img = img.type(torch.float)
 
         # Get annotations
