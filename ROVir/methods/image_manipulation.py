@@ -23,7 +23,7 @@ def auto_contrast(image, q=.99, dim=None):
     limit = np.quantile(sort_flat[nval:], q)
     print(limit)
     flat[flat > limit] = limit
-    flat[flat < 100] = 0
+    flat[flat < 100] = 100
     if dim:
         return flat.reshape(*image.shape[:2], dim)
     return flat.reshape(*image.shape[:2])
@@ -86,8 +86,10 @@ def plot_images(img1, title1, nmax1, img2,
                         cmap='gray')
     axs[0].set_title(title1)
 
-    im2 = axs[1].imshow(img2,
-                        cmap='gray')
+    im2 = axs[1].imshow(
+        img2,cmap='gray',
+        vmin=0, vmax=800
+    )
     axs[1].set_title(title2)
 
     if save:
@@ -131,8 +133,9 @@ def plot_intensities(img1, img2, height, save=False):
     ax0.set_title('Before ROVir')
 
     ax1 = plt.subplot(222)
-    ax1.imshow(
-        img2, cmap='gray'
+    im2 = ax1.imshow(
+        img2, cmap='gray',
+        vmin=0, vmax=800
     )
     ax1.plot(
         [0, img2.shape[0]-1],

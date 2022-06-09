@@ -11,9 +11,9 @@ def ROVir(coils, regions, lowf):
 
     print("Filtering the image...")
     #w_coils = coils*filter_coils(coils)
-    w_coils = filter_coils(coils, 10)
+    w_coils = filter_coils(coils, 25)
 
-    plot_coils(w_coils)
+    #plot_coils(w_coils)
     HEIGHT, WIDTH, NCOILS = w_coils.shape
     #plot_coils(w_coils, 'W_coils')
 

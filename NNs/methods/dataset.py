@@ -12,6 +12,17 @@ import cv2 as cv
 import json
 
 
+def auto_contrast(image, q=.99, dim=None):
+    flat = image.flatten()
+    sort_flat = np.sort(flat)
+    nval = len(image[image < 50])
+    limit = np.quantile(sort_flat[nval:], q)
+    flat[flat > limit] = limit
+    flat[flat < 100] = 100
+    if dim:
+        return flat.reshape(*image.shape[:2], dim)
+    return flat.reshape(*image.shape[:2])
+
 class ChestHeartDataset(Dataset):
     """Chest MRI image dataset"""
 
@@ -38,6 +49,7 @@ class ChestHeartDataset(Dataset):
         img_path = img_path[:6] + img_path[8:]
         img_path = self.root + '/' + img_path
         img = cv.imread(img_path, 0)
+        img = auto_contrast(img)
         w,h = img.shape[:2]
         #img = Image.open(img_path)
         tensorizer = T.Compose([
@@ -45,13 +57,11 @@ class ChestHeartDataset(Dataset):
         ])
         img = tensorizer(img)
         img = img.float()
-        hist, bins = torch.histogram(img,bins=64)
-        limit = torch.quantile(bins, 0.99)
-        img = img/limit
-        img = T.Normalize(
-            mean=img.mean(),
-            std=img.std()
-        )(img)
+        img = (img-img.min())/img.max()
+        #img = T.Normalize(
+        #    mean=img.mean(),
+        #    std=img.std()
+        #)(img)
         #img = img.type(torch.float)
 
         # Get annotations

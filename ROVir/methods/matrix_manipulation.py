@@ -96,7 +96,7 @@ def generate_virtual_coils(coils, weights, topNv):
 
 
 def normalize_matrix(matrix):
-    return matrix/np.max(matrix)
+    return (matrix-np.min(matrix))/np.max(matrix)
 
 
 def expand_weights(weights, size):

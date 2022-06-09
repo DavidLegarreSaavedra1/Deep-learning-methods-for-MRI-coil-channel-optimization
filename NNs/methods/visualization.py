@@ -7,6 +7,8 @@ import cv2 as cv
 import numpy as np
 import matplotlib
 import torchvision
+
+from .dataset import auto_contrast
 matplotlib.use('TkAgg')
 
 def show(imgs):
@@ -31,6 +33,7 @@ def preprocess(img, device = "cpu", img_size = 144):
     """
 
     image = cv.resize(img, (img_size, img_size))
+    #image = auto_contrast(img, 0.99)
     #image = image.astype(np.float) / 255.0
 
     # convert image to a tensor
@@ -38,19 +41,12 @@ def preprocess(img, device = "cpu", img_size = 144):
         image
     ).to(device).float()
     image = image.float()
-    hist, bins = torch.histogram(image.cpu(),bins=64)
-    limit = torch.quantile(bins, 0.99)
-    image = image/limit
+    image = (image-image.min())/image.max()
 
     # Unsqueeze tensor to add batch dimension
     image = image.unsqueeze(0)
     image = image.unsqueeze(0)
 
-    # Normalize the batch
-    image = T.Normalize(
-        mean=image.mean(),
-        std=image.std()
-    )(image)
 
     return image
 

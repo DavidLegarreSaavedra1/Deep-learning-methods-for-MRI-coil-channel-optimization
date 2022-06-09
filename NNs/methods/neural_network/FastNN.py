@@ -49,12 +49,14 @@ class FastNN(nn.Module):
             nn.ReLU(),
             nn.Conv2d(10, 10, 3),
             nn.ReLU(),
-            nn.MaxPool2d(2)
+            nn.MaxPool2d(2),
+            nn.Dropout(0.8)
         )
 
         self.box_regressor = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(10*46*46, 4)
+            nn.Linear(10*46*46, 4),
+            nn.Dropout(0.8)
         )
     
     def forward(self, x: torch.Tensor):

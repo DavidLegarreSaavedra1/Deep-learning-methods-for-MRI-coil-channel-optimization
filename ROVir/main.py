@@ -17,9 +17,11 @@ import matplotlib
 # Matplotlib configuration
 matplotlib.use('tkagg')
 plt.style.use('ggplot')
-plt.rcParams['image.cmap'] = "bwr"
+plt.rcParams['image.cmap'] = "gray"
 plt.rcParams['figure.dpi'] = "100"
 plt.rcParams["savefig.bbox"] = "tight"
+plt.rcParams["axes.grid"] = "False"
+plt.rcParams["savefig.transparent"] = "True"
 
 # Paths
 dirs = [os.getcwd(), "data"]
@@ -30,7 +32,7 @@ A_W = slice(200, 390)
 B1_W = slice(0, 150)
 B2_W = slice(430, -1)
 A_H = slice(120, 280)
-B1_H = slice(80, 450)
+B1_H = slice(50, 450)
 
 LINE = 300
 DEBUGGING = False
@@ -45,7 +47,6 @@ H_H = slice(230, 400)
 def main():
 
     img = nib.load(os.path.join(data_path, "Slice44-AllChannels.nii"))
-    print(type(img))
 
     height = img.shape[0]
     width = img.shape[1]
@@ -55,34 +56,27 @@ def main():
 
     img_np = np.array(img.dataobj) 
     img_np = np.flip(img_np, [0,1])
-    img_np = auto_contrast(img_np, 0.99, 25)
 
+    plot_coils(filter_coils(img_np,1))
 
     prev_img = combine_images(img_np)
     prev_img = auto_contrast(prev_img, 0.99)
 
-    print(prev_img.shape)
-    prev_img_ = cv.normalize(prev_img, None, alpha=0,beta=255, norm_type=cv.NORM_MINMAX)
-    print(prev_img.shape)
-
-
     cv.imwrite('prev_img.png', prev_img)
 
-    fig, axs = plt.subplots(1, 2)
     regions = [A_W, A_H, B1_W, B1_H, B2_W]
 
     rovir_coils, bot_coils = ROVir(img_np, regions,  lowf)
 
     new_img = combine_images(rovir_coils)
+    #new_img = auto_contrast(new_img, 0.99)
     bot_img = combine_images(bot_coils)
 
     nmax1 = np.max(prev_img[H_H, H_W])
     nmax2 = np.max(new_img[H_H, H_W])
 
-    save_image(
-        prev_img,
-        "prev_img"
-    )
+    fig, ax = plt.subplots()
+    ax.imshow(prev_img)
     
    # plot_image(
    #     prev_img,
@@ -107,15 +101,18 @@ def main():
         int(nmax1)*2.5
     )
 
-    print(prev_img.shape)
-    print(new_img.shape)
-    
     plot_intensities(
         prev_img, new_img, 
         235, save=True
     )
     plt.tight_layout()
     plt.show()
+
+    cv.normalize(
+        prev_img, prev_img, 
+        0, 255, cv.CV_8U
+    )
+    cv.imwrite("prev_img.png", prev_img)
 
 
 if __name__ == '__main__':

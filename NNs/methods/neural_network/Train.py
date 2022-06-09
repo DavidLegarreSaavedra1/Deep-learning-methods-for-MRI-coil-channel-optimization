@@ -90,7 +90,7 @@ def train(
     loss_saved = []
     best_epoch = []
     best_vloss = 1_000_000
-    patience = 7
+    patience = 10
     trigger = 0
 
     adam = False
