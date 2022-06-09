@@ -9,9 +9,9 @@ import matplotlib.pyplot as plt
 def ROVir(coils, regions, lowf):
     A_W, A_H, B1_W, B1_H, B2_W = regions
 
-    print("Filtering the image...")
+    print("Filtering coils...")
     #w_coils = coils*filter_coils(coils)
-    w_coils = filter_coils(coils, 25)
+    w_coils = filter_coils(coils, 12)
 
     #plot_coils(w_coils)
     HEIGHT, WIDTH, NCOILS = w_coils.shape
@@ -23,6 +23,13 @@ def ROVir(coils, regions, lowf):
     A[A_H, A_W, :] = w_coils[A_H, A_W, :]
     B[B1_H, B1_W, :] = w_coils[B1_H, B1_W, :]
     B[B1_H, B2_W, :] = w_coils[B1_H, B2_W, :]
+
+    coil = 2
+    fig, ax = plt.subplots()
+    ax.imshow(w_coils[..., coil])
+    fig, ax = plt.subplots()
+    ax.imshow(coils[...,coil])
+    
 
     plot_masks(
         combine_images(coils),

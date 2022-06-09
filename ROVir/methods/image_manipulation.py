@@ -80,20 +80,22 @@ def save_image(img, title):
 
 
 def plot_images(img1, title1, nmax1, img2,
-                title2, nmax2, save=False):
+                title2, nmax2, save=False,
+                saveTitle=""):
     fig, axs = plt.subplots(1, 2)
-    im1 = axs[0].imshow(img1,
-                        cmap='gray')
+    im1 = axs[0].imshow(
+        img1,cmap='gray',
+        vmin=0, vmax=nmax1)
     axs[0].set_title(title1)
 
     im2 = axs[1].imshow(
         img2,cmap='gray',
-        vmin=0, vmax=800
+        vmin=0, vmax=nmax2
     )
     axs[1].set_title(title2)
 
     if save:
-        plt.savefig("comparing_imgs.png", transparent=True)
+        plt.savefig(saveTitle+".png", transparent=True)
 
 
 def plot_coils(coils, title=''):

@@ -46,20 +46,7 @@ def generate_matrix(coils):
 
     for i in range(ncoils):
         for j in range(ncoils):
-            matrix[i, j] = np.sum(coils[:, i].T.dot(coils[:, j]))
-
-    return matrix
-
-
-def generate_matrix_im(coils):
-    """Generate a matrix according to ROVir method"""
-
-    ncoils = coils.shape[0]
-    matrix = np.zeros((ncoils, ncoils)).astype(np.csingle)
-    for i in range(ncoils):
-        for j in range(ncoils):
-            matrix[i, j] = np.sum(
-                np.matrix(coils[i, :, :]).H.dot(coils[i, :, :]))
+            matrix[i, j] = np.sum(coils[:, j].T.dot(coils[:, i]))
 
     return matrix
 

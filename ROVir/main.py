@@ -13,6 +13,7 @@ import cv2 as cv
 import scipy.misc
 import matplotlib.image as mpimg
 import matplotlib
+import seaborn as sns
 
 # Matplotlib configuration
 matplotlib.use('tkagg')
@@ -35,7 +36,6 @@ A_H = slice(120, 280)
 B1_H = slice(50, 450)
 
 LINE = 300
-DEBUGGING = False
 
 regions = [A_W, A_H, B1_W, B1_H, B2_W]
 
@@ -57,8 +57,6 @@ def main():
     img_np = np.array(img.dataobj) 
     img_np = np.flip(img_np, [0,1])
 
-    plot_coils(filter_coils(img_np,1))
-
     prev_img = combine_images(img_np)
     prev_img = auto_contrast(prev_img, 0.99)
 
@@ -66,39 +64,23 @@ def main():
 
     regions = [A_W, A_H, B1_W, B1_H, B2_W]
 
-    rovir_coils, bot_coils = ROVir(img_np, regions,  lowf)
+    rovir_coils, _ = ROVir(img_np, regions,  lowf)
 
     new_img = combine_images(rovir_coils)
-    #new_img = auto_contrast(new_img, 0.99)
-    bot_img = combine_images(bot_coils)
+    #bot_img = combine_images(bot_coils)
 
     nmax1 = np.max(prev_img[H_H, H_W])
     nmax2 = np.max(new_img[H_H, H_W])
 
-    fig, ax = plt.subplots()
-    ax.imshow(prev_img)
-    
-   # plot_image(
-   #     prev_img,
-   #     save=True
-   # )
-
-    plot_images(prev_img,
-                "Before ROVir",
-                int(nmax1)*2.5,
-                new_img,
-                "After ROVir",
-                int(nmax2)*2,
-                save=True
-                )
-
     plot_images(
+        prev_img,
+        "Before ROVir",
+        int(nmax1)*2.5,
         new_img,
-        "Top coils",
-        int(nmax2),
-        bot_img,
-        "Bottom coils",
-        int(nmax1)*2.5
+        "After ROVir",
+        nmax2=800,
+        save=True,
+        saveTitle="Comparing Rovir"
     )
 
     plot_intensities(
@@ -106,11 +88,13 @@ def main():
         235, save=True
     )
     plt.tight_layout()
-    plt.show()
+    plt.show(block=False)
+    plt.close('all') 
 
-    cv.normalize(
-        prev_img, prev_img, 
-        0, 255, cv.CV_8U
+    prev_img = cv.normalize(
+        prev_img, None, 
+        0, 255, cv.NORM_MINMAX,
+        cv.CV_32F
     )
     cv.imwrite("prev_img.png", prev_img)
 
