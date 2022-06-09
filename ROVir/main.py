@@ -6,6 +6,16 @@ import h5py
 from methods import *
 from methods import ROVIR_im
 import math
+import matplotlib
+
+matplotlib.use('tkagg')
+plt.style.use('ggplot')
+plt.rcParams['image.cmap'] = "gray"
+plt.rcParams['figure.dpi'] = "100"
+plt.rcParams["savefig.bbox"] = "tight"
+plt.rcParams["axes.grid"] = "False"
+plt.rcParams["savefig.transparent"] = "True"
+
 
 dirs = [os.getcwd(), "data"]
 data_path = os.path.join(*dirs)

@@ -4,7 +4,18 @@ from numpy import linalg as LA, vectorize
 import matplotlib.pyplot as plt
 from methods.complex import *
 from methods.matrix_manipulation import *
+from methods.image_manipulation import *
 
+
+def combine_coils(channels):
+    # Start by combining images by the root sum of squares
+
+    reconstructed_image = np.zeros(channels.shape[1:])
+    for i in range(channels.shape[0]):
+        reconstructed_image = (np.square(channels[i, :, :])
+                                      + (reconstructed_image))
+
+    return np.sqrt(reconstructed_image)
 
 def ROVir_im(coils, regions, lowf=5):
     f = np.vectorize(convert_void_toC)
@@ -18,6 +29,10 @@ def ROVir_im(coils, regions, lowf=5):
     print("\nFinished converting")
 
     print(coils.shape)
+    fig, ax = plt.subplots()
+    coils_ = combine_coils(coils.real[0,...])
+    coils_ = np.flip(coils_, 0)
+    ax.imshow(coils_.T)
 
     A = np.zeros(coils.shape).astype(np.csingle)
     B = np.zeros(coils.shape).astype(np.csingle)

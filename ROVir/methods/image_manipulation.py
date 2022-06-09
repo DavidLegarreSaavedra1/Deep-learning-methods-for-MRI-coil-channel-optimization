@@ -7,10 +7,10 @@ def combine_images(channels):
 
     reconstructed_image = np.zeros(channels.shape[:1])
     for i in range(channels.shape[2]):
-        reconstructed_image = np.sqrt(np.square(channels[:, :, i])
-                                      + np.square(reconstructed_image))
+        reconstructed_image = (np.square(channels[:, :, i])
+                                      + (reconstructed_image))
 
-    return reconstructed_image
+    return np.sqrt(reconstructed_image)
 
 
 def intensity_plot(image, line):
