@@ -50,18 +50,22 @@ class ChestHeartDataset(Dataset):
         img_path = self.root + '/' + img_path
         img = cv.imread(img_path, 0)
         img = auto_contrast(img)
+        img = img.astype(np.float)
         w,h = img.shape[:2]
+        _, bins = np.histogram(img.flatten(), bins=64)
+        limit = np.quantile(bins, 0.8)
+        img /= limit
         #img = Image.open(img_path)
         tensorizer = T.Compose([
             T.ToTensor(),
         ])
         img = tensorizer(img)
         img = img.float()
-        img = (img-img.min())/img.max()
-        #img = T.Normalize(
-        #    mean=img.mean(),
-        #    std=img.std()
-        #)(img)
+        #img = (img-img.min())/img.max()
+        img = T.Normalize(
+            mean=img.mean(),
+            std=img.std()
+        )(img)
         #img = img.type(torch.float)
 
         # Get annotations

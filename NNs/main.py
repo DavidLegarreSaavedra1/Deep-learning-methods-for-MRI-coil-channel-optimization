@@ -46,7 +46,7 @@ if __name__ == '__main__':
     )
 
 
-    train_len = int(0.7 * len(heart_dataset))
+    train_len = int(0.9 * len(heart_dataset))
     test_len = int((len(heart_dataset)-train_len)/2)
     val_len = int(len(heart_dataset)-train_len-test_len)
 

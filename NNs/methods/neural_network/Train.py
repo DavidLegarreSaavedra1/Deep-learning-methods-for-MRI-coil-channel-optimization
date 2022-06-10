@@ -19,8 +19,8 @@ def loss_fn(pred, target):
     #target /= 144
     # print(f"{pred=}")
     # print(f"{target=}")
-    #loss = nn.SmoothL1Loss()(pred, target)
-    loss = nn.L1Loss()(pred, target)
+    loss = nn.SmoothL1Loss()(pred, target)
+    #loss = nn.L1Loss()(pred, target)
     #loss = nn.MSELoss()(pred, target)
     return loss
 
@@ -90,19 +90,19 @@ def train(
     loss_saved = []
     best_epoch = []
     best_vloss = 1_000_000
-    patience = 10
+    patience = 7
     trigger = 0
 
     adam = False
 
     optimizer = torch.optim.SGD(
-        model.parameters(), lr=1e-3,
-        momentum=0.9, weight_decay=1e-1
+        model.parameters(), lr=3e-2,
+        momentum=0.9, weight_decay=1e-2
     )
 
     if adam:
         optimizer = torch.optim.Adam(
-            model.parameters(), lr=1e-2
+            model.parameters(), lr=1e-4
         )
 
     for epoch in tqdm(range(n_epochs)):

@@ -46,17 +46,19 @@ class FastNN(nn.Module):
         self.resize = T.Resize(image_size)
         self.block1 = nn.Sequential(
             nn.Conv2d(1, 10, 3),
+            nn.BatchNorm2d(10),
             nn.ReLU(),
-            nn.Conv2d(10, 10, 3),
+            nn.Conv2d(10, 24, 3),
+            nn.BatchNorm2d(24),
             nn.ReLU(),
             nn.MaxPool2d(2),
-            nn.Dropout(0.8)
+            nn.Dropout(0.5)
         )
 
         self.box_regressor = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(10*46*46, 4),
-            nn.Dropout(0.8)
+            nn.Linear(24*46*46, 4),
+            #nn.Dropout(0.5)
         )
     
     def forward(self, x: torch.Tensor):
