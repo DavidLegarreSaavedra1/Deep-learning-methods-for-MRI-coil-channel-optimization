@@ -52,7 +52,7 @@ def main():
     width = img.shape[1]
     num_coils = img.shape[2]
     # lowf = int(input("lowf = "))
-    lowf = 10
+    lowf = 5
 
     img_np = np.array(img.dataobj) 
     img_np = np.flip(img_np, [0,1])
@@ -97,6 +97,14 @@ def main():
         cv.CV_32F
     )
     cv.imwrite("prev_img.png", prev_img)
+
+    new_img = cv.convertScaleAbs(new_img, alpha=0.2, beta=0)
+    new_img = cv.normalize(
+        new_img, None, 
+        0, 255, cv.NORM_MINMAX,
+        cv.CV_32F
+    )
+    cv.imwrite("new_img"+str(lowf)+".png", new_img)
 
 
 if __name__ == '__main__':

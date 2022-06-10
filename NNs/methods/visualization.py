@@ -50,10 +50,10 @@ def preprocess(img, device = "cpu", img_size = 144):
     # Unsqueeze tensor to add batch dimension
     image = image.unsqueeze(0)
     image = image.unsqueeze(0)
-    img = T.Normalize(
-            mean=img.mean(),
-            std=img.std()
-        )(img)
+    image = T.Normalize(
+            mean=image.mean(),
+            std=image.std()
+    )(image)
 
     return image
 

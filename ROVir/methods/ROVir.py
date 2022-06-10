@@ -57,7 +57,9 @@ def ROVir(coils, regions, lowf):
 
     v_coils = generate_virtual_coils(coils, topweights, len(topNv))
 
-    bot_v_coils = generate_virtual_coils(coils, botweights, len(topNv))
+    bot_v_coils = generate_virtual_coils(coils, botweights, 25-len(topNv))
+
+    v_coils = v_coils[:,:,:-lowf]
 
     return v_coils, bot_v_coils
     # return w_coils
