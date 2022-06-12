@@ -48,19 +48,15 @@ class FastNN(nn.Module):
             nn.Conv2d(1, 10, 3),
             nn.BatchNorm2d(10),
             nn.ReLU(),
+            nn.AvgPool2d(2)
         )
 
         self.block2 = nn.Sequential(
-            nn.Conv2d(10, 24, 3),
+            nn.Conv2d(10, 24, 3, stride=2),
             nn.BatchNorm2d(24),
             nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(24, 24, 3),
+            nn.Conv2d(24, 24, 3, stride=2),
             nn.BatchNorm2d(24),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(24, 32, 3),
-            nn.BatchNorm2d(32),
             nn.ReLU(),
             nn.MaxPool2d(2),
             nn.Dropout(0.5)
@@ -68,14 +64,15 @@ class FastNN(nn.Module):
 
         self.box_regressor = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(10*94*94, 4),
-            nn.Dropout(0.5)
+            nn.Linear(24*5*5, 4),
+            #nn.Dropout(0.5)
         )
     
     def forward(self, x: torch.Tensor):
         x = self.resize(x)
 
         x = self.block1(x)
+        x = self.block2(x)
         x = self.box_regressor(x)
 
         return x

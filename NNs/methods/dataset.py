@@ -49,12 +49,12 @@ class ChestHeartDataset(Dataset):
         img_path = img_path[:6] + img_path[8:]
         img_path = self.root + '/' + img_path
         img = cv.imread(img_path, 0)
-        img = auto_contrast(img)
+        #img = auto_contrast(img)
         img = img.astype(np.float)
         w,h = img.shape[:2]
-        _, bins = np.histogram(img.flatten(), bins=64)
-        limit = np.quantile(bins, 0.8)
-        img /= limit
+        #_, bins = np.histogram(img.flatten(), bins=64)
+        #limit = np.quantile(bins, 0.8)
+        #img /= limit
         #img = Image.open(img_path)
         tensorizer = T.Compose([
             T.ToTensor(),

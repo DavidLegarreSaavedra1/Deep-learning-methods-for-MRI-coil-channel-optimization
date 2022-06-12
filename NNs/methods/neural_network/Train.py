@@ -1,5 +1,4 @@
 from tqdm.auto import tqdm
-from torch.utils.tensorboard import SummaryWriter
 from logging import root
 from datetime import datetime
 from timeit import default_timer as timer
@@ -19,8 +18,8 @@ def loss_fn(pred, target):
     #target /= 144
     # print(f"{pred=}")
     # print(f"{target=}")
-    loss = nn.SmoothL1Loss()(pred, target)
-    #loss = nn.L1Loss()(pred, target)
+    #loss = nn.SmoothL1Loss()(pred, target)
+    loss = nn.L1Loss()(pred, target)
     #loss = nn.MSELoss()(pred, target)
     return loss
 
@@ -90,13 +89,13 @@ def train(
     loss_saved = []
     best_epoch = []
     best_vloss = 1_000_000
-    patience = 7
+    patience = 5
     trigger = 0
 
     adam = False
 
     optimizer = torch.optim.SGD(
-        model.parameters(), lr=3e-2,
+        model.parameters(), lr=1e-3,
         momentum=0.9, weight_decay=1e-2
     )
 

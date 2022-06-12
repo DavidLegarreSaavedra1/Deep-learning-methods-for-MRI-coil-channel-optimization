@@ -18,8 +18,8 @@ plt.rcParams["savefig.bbox"] = "tight"
 torch.cuda.empty_cache()
 
 
-N_EPOCHS = 100
-BATCH_SIZE = 32
+N_EPOCHS = 50
+BATCH_SIZE = 4
 IMG_SIZE = 96
 TO_TRAIN = True
 
@@ -42,16 +42,16 @@ if __name__ == '__main__':
    
     heart_dataset = ChestHeartDataset(
         root_data_path, training_ann, 
-        transforms=train_transformers
+        transforms=None
     )
 
 
     train_len = int(0.9 * len(heart_dataset))
-    test_len = int((len(heart_dataset)-train_len)/2)
-    val_len = int(len(heart_dataset)-train_len-test_len)
+    #test_len = int((len(heart_dataset)-train_len)/2)
+    val_len = int(len(heart_dataset)-train_len)
 
     train_dataset, val_dataset= torch.utils.data.random_split(
-        heart_dataset, [train_len, val_len*2]
+        heart_dataset, [train_len, val_len]
     )
 
     training_data_loader = torch.utils.data.DataLoader(

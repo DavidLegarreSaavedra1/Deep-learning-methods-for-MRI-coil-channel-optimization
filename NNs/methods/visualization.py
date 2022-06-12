@@ -33,11 +33,11 @@ def preprocess(img, device = "cpu", img_size = 144):
     """
 
     image = cv.resize(img, (img_size, img_size))
-    image = auto_contrast(img, 0.99)
-    hist, bins = np.histogram(image.flatten(), bins=64)
-    image = image.astype(np.float)
-    limit = np.quantile(bins, 0.8)
-    image /= limit
+    #image = auto_contrast(img, 0.99)
+    #hist, bins = np.histogram(image.flatten(), bins=64)
+    #image = image.astype(np.float)
+    #limit = np.quantile(bins, 0.8)
+    #image /= limit
     #image = image.astype(np.float) / 255.0
 
     # convert image to a tensor

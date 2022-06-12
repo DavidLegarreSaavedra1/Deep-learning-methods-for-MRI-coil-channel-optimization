@@ -51,7 +51,7 @@ def ROVir(coils, regions, lowf):
     A = generate_matrix(A)
     B = generate_matrix(B)
 
-    comb = LA.inv(B)*A
+    comb = LA.inv(A)*B
 
     topNv, topweights, botweights = calculate_eig(comb, lowf)
 
