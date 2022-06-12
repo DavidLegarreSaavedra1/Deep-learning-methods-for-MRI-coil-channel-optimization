@@ -18,8 +18,8 @@ plt.rcParams["savefig.bbox"] = "tight"
 torch.cuda.empty_cache()
 
 
-N_EPOCHS = 50
-BATCH_SIZE = 4
+N_EPOCHS = 30
+BATCH_SIZE = 32
 IMG_SIZE = 96
 TO_TRAIN = True
 

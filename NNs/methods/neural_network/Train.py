@@ -89,7 +89,7 @@ def train(
     loss_saved = []
     best_epoch = []
     best_vloss = 1_000_000
-    patience = 5
+    patience = 7
     trigger = 0
 
     adam = False
@@ -101,7 +101,7 @@ def train(
 
     if adam:
         optimizer = torch.optim.Adam(
-            model.parameters(), lr=1e-4
+            model.parameters(), lr=5e-5
         )
 
     for epoch in tqdm(range(n_epochs)):

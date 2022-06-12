@@ -9,7 +9,7 @@ import torchvision.transforms as T
 import time
 
 
-class TestNN(nn.Module):
+class FastNN(nn.Module):
     def __init__(self, image_size) -> None:
         super().__init__()
         self.block1 = nn.Sequential(
@@ -19,28 +19,45 @@ class TestNN(nn.Module):
             #nn.Dropout(0.75)
         )
         self.block2 = nn.Sequential(
-            nn.Conv2d(10, 10, 3),
+            nn.Conv2d(10, 24, 3),
+            nn.BatchNorm2d(24),
             nn.ReLU(),
-            nn.Conv2d(10, 10, 3),
+            nn.Conv2d(24, 24, 3),
+            nn.BatchNorm2d(24),
             nn.ReLU(),
             nn.MaxPool2d(2),
-            nn.Dropout(0.75)
+            nn.Dropout(0.5)
+        )
+        self.block3 = nn.Sequential(
+            nn.Conv2d(24, 24, 3),
+            nn.BatchNorm2d(24),
+            nn.ReLU(),
+            nn.Conv2d(24, 24, 3),
+            nn.BatchNorm2d(24),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Dropout(0.5)
         )
         self.box_regressor = nn.Sequential(
                 nn.Flatten(),
-                nn.Linear(10*21*21, 4),
+                nn.Linear(24*8*8, 512),
+                nn.ReLU(),
+                nn.Linear(512, 4)
         )
         self.resize = T.Resize(image_size)
 
     def forward(self, x: torch.Tensor):
         x = self.resize(x)
+
         x = self.block1(x)
         x = self.block2(x)
+        x = self.block3(x)
+
         x = self.box_regressor(x)
 
         return x
 
-class FastNN(nn.Module):
+class TestNN(nn.Module):
     def __init__(self, image_size) -> None:
         super().__init__()
         self.resize = T.Resize(image_size)
@@ -48,7 +65,7 @@ class FastNN(nn.Module):
             nn.Conv2d(1, 10, 3),
             nn.BatchNorm2d(10),
             nn.ReLU(),
-            nn.AvgPool2d(2)
+            nn.MaxPool2d(2)
         )
 
         self.block2 = nn.Sequential(
