@@ -1,8 +1,8 @@
 import numpy as np
 import sys
 from numpy import linalg as LA, vectorize
-from methods.matrix_manipulation import *
-from methods.image_manipulation import *
+from .matrix_manipulation import *
+from .image_manipulation import *
 import matplotlib.pyplot as plt
 
 
