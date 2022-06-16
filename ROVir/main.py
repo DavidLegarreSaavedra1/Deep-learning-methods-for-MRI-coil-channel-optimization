@@ -57,6 +57,8 @@ def main():
     img_np = np.array(img.dataobj) 
     img_np = np.flip(img_np, [0,1])
 
+    plot_coils(img_np)
+
     prev_img = combine_images(img_np)
     prev_img = auto_contrast(prev_img, 0.99)
 

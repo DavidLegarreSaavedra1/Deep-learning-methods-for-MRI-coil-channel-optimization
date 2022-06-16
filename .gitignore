@@ -129,9 +129,6 @@ dmypy.json
 .pyre/
 
 
-data/
-ROVir/data/
-NNs/data/
 ideas/
 results/
 *.pdf
