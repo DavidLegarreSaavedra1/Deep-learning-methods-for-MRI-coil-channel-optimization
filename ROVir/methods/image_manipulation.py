@@ -21,7 +21,6 @@ def auto_contrast(image, q=.99, dim=None):
     sort_flat = np.sort(flat)
     nval = len(image[image < 50])
     limit = np.quantile(sort_flat[nval:], q)
-    print(limit)
     flat[flat > limit] = limit
     flat[flat < 100] = 100
     if dim:

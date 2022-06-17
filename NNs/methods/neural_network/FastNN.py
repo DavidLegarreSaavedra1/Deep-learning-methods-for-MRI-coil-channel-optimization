@@ -40,7 +40,10 @@ class FastNN(nn.Module):
         )
         self.box_regressor = nn.Sequential(
                 nn.Flatten(),
-                nn.Linear(24*8*8, 512),
+                nn.Linear(24*12*12, 1024),
+                nn.ReLU(),
+                nn.Dropout(0.5),
+                nn.Linear(1024, 512),
                 nn.ReLU(),
                 nn.Dropout(0.5),
                 nn.Linear(512, 4),

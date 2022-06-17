@@ -52,17 +52,15 @@ def main():
     width = img.shape[1]
     num_coils = img.shape[2]
     # lowf = int(input("lowf = "))
-    lowf = 5
+    lowf = 8
 
     img_np = np.array(img.dataobj) 
     img_np = np.flip(img_np, [0,1])
 
-    plot_coils(img_np)
 
     prev_img = combine_images(img_np)
     prev_img = auto_contrast(prev_img, 0.99)
 
-    cv.imwrite('prev_img.png', prev_img)
 
     regions = [A_W, A_H, B1_W, B1_H, B2_W]
 
@@ -90,24 +88,7 @@ def main():
         235, save=True
     )
     plt.tight_layout()
-    plt.show(block=False)
-    plt.close('all') 
-
-    prev_img = cv.normalize(
-        prev_img, None, 
-        0, 255, cv.NORM_MINMAX,
-        cv.CV_32F
-    )
-    cv.imwrite("prev_img.png", prev_img)
-
-    new_img = cv.convertScaleAbs(new_img, alpha=0.2, beta=0)
-    new_img = cv.normalize(
-        new_img, None, 
-        0, 255, cv.NORM_MINMAX,
-        cv.CV_32F
-    )
-    cv.imwrite("new_img"+str(lowf)+".png", new_img)
-
+    plt.show()
 
 if __name__ == '__main__':
     main()

@@ -19,8 +19,8 @@ torch.cuda.empty_cache()
 
 
 N_EPOCHS = 30
-BATCH_SIZE = 32
-IMG_SIZE = 96
+BATCH_SIZE = 4
+IMG_SIZE = 128
 TO_TRAIN = True
 
 if torch.cuda.is_available():
