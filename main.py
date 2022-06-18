@@ -7,11 +7,12 @@ import torchvision.transforms as T
 
 WEIGHTS_PATH = (path.cwd() / "model" / "net.pth").as_posix()
 IMG_PATH = (path.cwd() / "data" / "input.png").as_posix()
-COILS_PATH = (path.cwd() / "data" / "Slice44-AllChannels.nii").as_posix()
+COILS_PATH = (path.cwd() / "data")
+COILS_PATH = list(COILS_PATH.glob('*.nii'))[0].as_posix()
 IMG_SIZE = 96
 
-model = load_model(WEIGHTS_PATH, IMG_SIZE)
 coils = extract_coils(COILS_PATH)
+model = load_model(WEIGHTS_PATH, IMG_SIZE)
 
 w,h = coils.shape[:2]
 print(w,h)

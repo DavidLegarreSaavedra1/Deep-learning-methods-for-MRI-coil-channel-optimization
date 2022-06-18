@@ -140,3 +140,4 @@ results/
 **.png
 ROVIR_im.py
 NNs/runs/**
+*.nii
