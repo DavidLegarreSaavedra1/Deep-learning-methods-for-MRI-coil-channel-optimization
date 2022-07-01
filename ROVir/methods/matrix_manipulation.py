@@ -8,12 +8,11 @@ import matplotlib.image as mpimg
 from sklearn.preprocessing import normalize
 
 
-def calculate_eig(A, lowf):
+def calculate_eig(A):
     eigVal, eigVec = LA.eig(A)
-    print(eigVal.shape)
     topNv = eigVal.argsort()[::-1]
-    print(eigVal[topNv[0]],eigVal[topNv[-1]])
-    botNv = topNv[-lowf:]
+    # Test to obtain hte bottom coils
+    botNv = topNv[-5:]
     #topNv = topNv[:-lowf]
     botweights = eigVec[:, botNv]
     return topNv, eigVec, botweights

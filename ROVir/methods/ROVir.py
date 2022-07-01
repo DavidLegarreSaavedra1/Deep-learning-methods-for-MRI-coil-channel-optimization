@@ -6,7 +6,7 @@ from .image_manipulation import *
 import matplotlib.pyplot as plt
 
 
-def ROVir(coils, regions, lowf):
+def ROVir(coils, regions, lowf=0):
     A_W, A_H, B1_W, B1_H, B2_W = regions
 
     print("Filtering coils...")
@@ -53,13 +53,14 @@ def ROVir(coils, regions, lowf):
 
     comb = LA.inv(B)*A
 
-    topNv, topweights, botweights = calculate_eig(comb, lowf)
+    topNv, topweights, botweights = calculate_eig(comb)
 
     v_coils = generate_virtual_coils(coils, topweights, len(topNv))
 
     bot_v_coils = generate_virtual_coils(coils, botweights, 25-len(topNv))
 
-    v_coils = v_coils[:,:,:-lowf]
+    if lowf!=0:
+        v_coils = v_coils[:,:,:-lowf]
 
     return v_coils, bot_v_coils
     # return w_coils

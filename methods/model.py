@@ -8,5 +8,6 @@ def load_model(
     model = FastNN(image_size)
 
     model.load_state_dict(torch.load(weights_path))
+    model.eval()
 
     return model
