@@ -54,13 +54,11 @@ def main():
     # lowf = int(input("lowf = "))
     lowf = 8
 
-    img_np = np.array(img.dataobj) 
-    img_np = np.flip(img_np, [0,1])
-
+    img_np = np.array(img.dataobj)
+    img_np = np.flip(img_np, [0, 1])
 
     prev_img = combine_images(img_np)
     prev_img = auto_contrast(prev_img, 0.99)
-
 
     regions = [A_W, A_H, B1_W, B1_H, B2_W]
 
@@ -84,11 +82,22 @@ def main():
     )
 
     plot_intensities(
-        prev_img, new_img, 
+        prev_img, new_img,
         235, save=True
     )
+
+    i = 0
+    for coil in rovir_coils.reshape(-1, 512, 512):
+        plt.imshow(coil)
+        plt.show()
+        coil = cv.normalize(
+            coil, None, 0, 255, cv.NORM_MINMAX
+        )
+        cv.imwrite("virtual/coil"+str(i)+".png", coil)
+        i += 1
     plt.tight_layout()
     plt.show()
+
 
 if __name__ == '__main__':
     main()
