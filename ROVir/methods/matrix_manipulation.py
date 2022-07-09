@@ -70,8 +70,6 @@ def filter_coils(coils, sigma=25):
 def generate_virtual_coils(coils, weights, topNv):
     v_coils = np.zeros(coils.shape)
     ncoils = coils.shape[-1]
-    print(topNv)
-    print(weights.shape)
     for j in range(topNv):
         total = 0
         for l in range(ncoils):

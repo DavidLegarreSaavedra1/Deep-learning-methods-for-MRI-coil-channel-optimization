@@ -8,6 +8,7 @@ import torchvision.transforms as T
 WEIGHTS_PATH = (path.cwd() / "model" / "net.pth").as_posix()
 IMG_PATH = (path.cwd() / "data" / "input.png").as_posix()
 COILS_PATH = (path.cwd() / "data")
+print(list(COILS_PATH.glob('*.nii'))[0].as_posix())
 try:
     COILS_PATH = list(COILS_PATH.glob('*.nii'))[0].as_posix()
 except:
@@ -45,7 +46,15 @@ regions = [A_W, A_H, B1_W, B_H, B2_W]
 
 rovir_coils, _ = ROVir(coils, regions)
 
-new_img = combine_images(rovir_coils)
+new_img = auto_drop_coils(prev_img, rovir_coils, [A_W, A_H])
+
+prev_img = auto_contrast(prev_img)
+new_img = auto_contrast(new_img, q=0.98)
+
+prev_img = cv.normalize(
+    prev_img, None, 0, 255,
+    cv.NORM_MINMAX
+)
 new_img = cv.normalize(
     new_img, None, 0, 255,
     cv.NORM_MINMAX
