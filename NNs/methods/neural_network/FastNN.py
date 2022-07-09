@@ -47,7 +47,8 @@ class FastNN(nn.Module):
                 nn.ReLU(),
                 nn.Dropout(0.5),
                 nn.Linear(512, 4),
-                nn.Dropout(0.6)
+                nn.Dropout(0.6),
+                nn.LeakyReLU(),
         )
         self.resize = T.Resize(image_size)
 

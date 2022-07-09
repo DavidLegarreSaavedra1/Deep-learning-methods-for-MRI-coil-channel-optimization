@@ -8,12 +8,11 @@ import matplotlib.image as mpimg
 from sklearn.preprocessing import normalize
 
 
-def calculate_eig(A, lowf):
+def calculate_eig(A):
     eigVal, eigVec = LA.eig(A)
-    print(eigVal.shape)
     topNv = eigVal.argsort()[::-1]
-    print(eigVal[topNv[0]],eigVal[topNv[-1]])
-    botNv = topNv[-lowf:]
+    # Test to obtain hte bottom coils
+    botNv = topNv[-5:]
     #topNv = topNv[:-lowf]
     botweights = eigVec[:, botNv]
     return topNv, eigVec, botweights
@@ -71,8 +70,6 @@ def filter_coils(coils, sigma=25):
 def generate_virtual_coils(coils, weights, topNv):
     v_coils = np.zeros(coils.shape)
     ncoils = coils.shape[-1]
-    print(topNv)
-    print(weights.shape)
     for j in range(topNv):
         total = 0
         for l in range(ncoils):

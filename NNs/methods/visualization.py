@@ -32,17 +32,9 @@ def preprocess(img, device = "cpu", img_size = 144):
     img_size: Size of the image to resize
     """
 
-    image = cv.resize(img, (img_size, img_size))
-    #image = auto_contrast(img, 0.99)
-    #hist, bins = np.histogram(image.flatten(), bins=64)
-    #image = image.astype(np.float)
-    #limit = np.quantile(bins, 0.8)
-    #image /= limit
-    #image = image.astype(np.float) / 255.0
-
     # convert image to a tensor
     image = torch.from_numpy(
-        image
+        img
     ).to(device).float()
     image = image.float()
     #image = (image-image.min())/image.max()
@@ -57,7 +49,7 @@ def preprocess(img, device = "cpu", img_size = 144):
 
     return image
 
-def postprocess(img, bbox, device):
+def postprocess(img, bbox, device='cpu'):
     """Postprocess the output
 
     This function will adapt the output of the network
@@ -84,6 +76,8 @@ def postprocess(img, bbox, device):
     new_bbox = torch.tensor(
        new_bbox, device=device 
     ).unsqueeze(0)
+
+    print(new_bbox)
 
     return img, new_bbox
 
