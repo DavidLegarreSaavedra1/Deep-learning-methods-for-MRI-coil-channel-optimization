@@ -3,6 +3,7 @@
 # Introduction
 
 This repository contains the code developed by David Legarre Saavedra for his Bachelor's degree final project.
+This Final project was done in collaboration with General Electric and L'Hospital Clínic de Barcelona.
 
 Magnetic resonance imaging (MRI) scanners use powerful magnets and make use of the
 human body reactions to such fields to produce images. Modern MRI uses multi-channel
